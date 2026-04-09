@@ -31,9 +31,17 @@ export default function VendorsDashboard({ orgId }: { orgId: string }) {
       setLoading(true);
       const response = await fetch(`/api/vendors?org_id=${orgId}`);
       const data = await response.json();
-      setVendors(data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setVendors(data);
+      } else {
+        console.warn('API returned non-array data:', data);
+        setVendors([]);
+      }
     } catch (error) {
       console.error('Error fetching vendors:', error);
+      setVendors([]);
     } finally {
       setLoading(false);
     }

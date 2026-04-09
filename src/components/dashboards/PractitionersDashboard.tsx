@@ -31,9 +31,17 @@ export default function PractitionersDashboard({ orgId }: { orgId: string }) {
       setLoading(true);
       const response = await fetch(`/api/practitioners?org_id=${orgId}`);
       const data = await response.json();
-      setPractitioners(data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setPractitioners(data);
+      } else {
+        console.warn('API returned non-array data:', data);
+        setPractitioners([]);
+      }
     } catch (error) {
       console.error('Error fetching practitioners:', error);
+      setPractitioners([]);
     } finally {
       setLoading(false);
     }

@@ -54,9 +54,17 @@ export default function ServicesDashboard({ orgId }: { orgId: string }) {
       setLoading(true);
       const response = await fetch(`/api/services?org_id=${orgId}`);
       const data = await response.json();
-      setServices(data);
+      
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setServices(data);
+      } else {
+        console.warn('API returned non-array data:', data);
+        setServices([]);
+      }
     } catch (error) {
       console.error('Error fetching services:', error);
+      setServices([]);
     } finally {
       setLoading(false);
     }
