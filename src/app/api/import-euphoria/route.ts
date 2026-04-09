@@ -3,23 +3,24 @@ import { NextRequest, NextResponse } from 'next/server';
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Practitioner mapping
-const PRACTITIONERS = {
-  'Brianna Krug': { role: 'Nurse', approval_level: 'owner' },
-  'Jaimie Burkett': { role: 'Nurse', approval_level: 'staff' },
-  'Kim Benitez': { role: 'Nurse', approval_level: 'staff' },
-  'Lexy Fazzone': { role: 'Nurse', approval_level: 'staff' },
-  'Michelle Wilson': { role: 'Nurse', approval_level: 'owner' },
-  'Nadine Delia': { role: 'Nurse', approval_level: 'staff' },
-  'Daisy': { role: 'PA', approval_level: 'staff' },
-  'Jordan Land': { role: 'PA', approval_level: 'staff' },
-  'Nicole Roberto': { role: 'Aesthetician', approval_level: 'staff' },
-  'Nicole Rekus': { role: 'Aesthetician', approval_level: 'staff' },
-  'Tori Grant': { role: 'Aesthetician', approval_level: 'staff' },
-  'Aubrey Rieger': { role: 'Masseuse', approval_level: 'staff' },
-};
+// Practitioners data
+const PRACTITIONERS = [
+  { name: 'Brianna Krug', role: 'Nurse', approval_level: 'owner' },
+  { name: 'Jaimie Burkett', role: 'Nurse', approval_level: 'staff' },
+  { name: 'Kim Benitez', role: 'Nurse', approval_level: 'staff' },
+  { name: 'Lexy Fazzone', role: 'Nurse', approval_level: 'staff' },
+  { name: 'Michelle Wilson', role: 'Nurse', approval_level: 'owner' },
+  { name: 'Nadine Delia', role: 'Nurse', approval_level: 'staff' },
+  { name: 'Daisy', role: 'PA', approval_level: 'staff' },
+  { name: 'Jordan Land', role: 'PA', approval_level: 'staff' },
+  { name: 'Nicole Roberto', role: 'Aesthetician', approval_level: 'staff' },
+  { name: 'Nicole Rekus', role: 'Aesthetician', approval_level: 'staff' },
+  { name: 'Tori Grant', role: 'Aesthetician', approval_level: 'staff' },
+  { name: 'Aubrey Rieger', role: 'Masseuse', approval_level: 'staff' },
+];
 
-const serviceData = [
+// Services data
+const SERVICES = [
   {
     category: 'Neurotoxins',
     name: 'Botox',
@@ -58,9 +59,13 @@ const serviceData = [
   },
 ];
 
-async function supabaseRequest(method: string, table: string, query: string = '', body?: any) {
-  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
-  
+async function supabaseRequest(
+  method: string,
+  table: string,
+  body?: unknown
+) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`;
+
   const response = await fetch(url, {
     method,
     headers: {
@@ -71,131 +76,154 @@ async function supabaseRequest(method: string, table: string, query: string = ''
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    console.error(`[SUPABASE] ${method} ${table}${query} failed:`, response.status, errorData);
-    throw new Error(`Supabase request failed: ${response.statusText} - ${errorData}`);
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
   }
 
-  const data = await response.json();
+  if (!response.ok) {
+    console.error(`[API] ${method} ${table} failed:`, response.status, data);
+    throw new Error(`Supabase error (${response.status}): ${typeof data === 'string' ? data : JSON.stringify(data)}`);
+  }
+
   return data;
 }
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[API] Import request received');
     const { org_id } = await request.json();
 
     if (!org_id) {
       return NextResponse.json({ error: 'org_id required' }, { status: 400 });
     }
 
-    console.log(`[IMPORT] Starting Euphoria data import for org: ${org_id}`);
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.error('[API] Missing Supabase configuration');
+      return NextResponse.json(
+        { error: 'Missing Supabase configuration' },
+        { status: 500 }
+      );
+    }
+
+    console.log(`[API] Starting import for org: ${org_id}`);
 
     // Step 1: Create organization
     try {
-      console.log(`[IMPORT] Creating organization...`);
-      await supabaseRequest('POST', 'organizations', '', {
+      await supabaseRequest('POST', 'organizations', {
         id: org_id,
         name: 'Euphoria Esthetics & Wellness',
         slug: 'euphoria-test',
         plan_tier: 'starter',
       });
-      console.log(`[IMPORT] ✓ Organization created`);
-    } catch (orgError) {
-      console.log(`[IMPORT] Organization may already exist, continuing...`, orgError);
+      console.log('[API] Organization created');
+    } catch (e) {
+      console.log('[API] Organization create error (might exist already)');
     }
 
     // Step 2: Create practitioners
-    console.log(`[IMPORT] Creating practitioners...`);
-    const practitionersMap: { [key: string]: string } = {};
+    console.log('[API] Creating practitioners...');
+    const practitionersToInsert = PRACTITIONERS.map((p) => {
+      const nameParts = p.name.split(' ');
+      return {
+        org_id,
+        first_name: nameParts[0],
+        last_name: nameParts.slice(1).join(' ') || '',
+        role: p.role,
+        approval_level: p.approval_level,
+        is_active: true,
+      };
+    });
 
-    for (const [name, { role, approval_level }] of Object.entries(PRACTITIONERS)) {
-      const nameParts = name.split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ') || '';
+    const practitionersResponse = await supabaseRequest(
+      'POST',
+      'practitioners',
+      practitionersToInsert
+    );
 
-      try {
-        const response = await supabaseRequest('POST', 'practitioners', '', {
-          org_id,
-          first_name: firstName,
-          last_name: lastName,
-          role,
-          approval_level,
-          is_active: true,
-        });
+    if (!Array.isArray(practitionersResponse)) {
+      throw new Error('Practitioners response is not an array');
+    }
 
-        if (Array.isArray(response) && response.length > 0) {
-          practitionersMap[name] = response[0].id;
-          console.log(`[IMPORT] ✓ Created practitioner: ${name}`);
+    console.log(`[API] Created ${practitionersResponse.length} practitioners`);
+
+    // Create map of name -> id
+    const practMap: { [key: string]: string } = {};
+    for (const pract of practitionersResponse) {
+      const fullName = `${pract.first_name} ${pract.last_name}`.trim();
+      practMap[fullName] = pract.id;
+    }
+
+    // Step 3: Create services
+    console.log('[API] Creating services...');
+    const servicesToInsert = SERVICES.map((s) => ({
+      org_id,
+      category: s.category,
+      name: s.name,
+      product: s.product,
+      supplier: s.supplier,
+      duration_minutes: s.duration_minutes,
+      price: s.price,
+    }));
+
+    const servicesResponse = await supabaseRequest(
+      'POST',
+      'services',
+      servicesToInsert
+    );
+
+    if (!Array.isArray(servicesResponse)) {
+      throw new Error('Services response is not an array');
+    }
+
+    console.log(`[API] Created ${servicesResponse.length} services`);
+
+    // Step 4: Create certifications
+    console.log('[API] Creating certifications...');
+    const certifications = [];
+
+    for (let i = 0; i < SERVICES.length; i++) {
+      const service = SERVICES[i];
+      const serviceId = servicesResponse[i]?.id;
+
+      if (!serviceId) continue;
+
+      for (const practName of service.practitioners) {
+        const practId = practMap[practName];
+        if (practId) {
+          certifications.push({
+            practitioner_id: practId,
+            service_id: serviceId,
+            certified: true,
+          });
         }
-      } catch (practError) {
-        console.log(`[IMPORT] Practitioner ${name} may exist:`, practError);
       }
     }
 
-    console.log(`[IMPORT] Found/created ${Object.keys(practitionersMap).length} practitioners`);
-
-    // Step 3: Create services and link practitioners
-    console.log(`[IMPORT] Creating services...`);
-    let servicesCount = 0;
-    let certificationsCount = 0;
-
-    for (const service of serviceData) {
-      try {
-        const response = await supabaseRequest('POST', 'services', '', {
-          org_id,
-          category: service.category,
-          name: service.name,
-          product: service.product,
-          supplier: service.supplier,
-          duration_minutes: service.duration_minutes,
-          price: service.price,
-        });
-
-        if (Array.isArray(response) && response.length > 0) {
-          const serviceId = response[0].id;
-          servicesCount++;
-          console.log(`[IMPORT] ✓ Created service: ${service.name}`);
-
-          // Create certifications
-          for (const practName of service.practitioners) {
-            const practId = practitionersMap[practName];
-            if (practId) {
-              try {
-                await supabaseRequest('POST', 'practitioner_certifications', '', {
-                  practitioner_id: practId,
-                  service_id: serviceId,
-                  certified: true,
-                });
-                certificationsCount++;
-              } catch (certError) {
-                console.log(`[IMPORT] Cert for ${practName}:`, certError);
-              }
-            }
-          }
-        }
-      } catch (serviceError) {
-        console.error(`[IMPORT] Error creating service ${service.name}:`, serviceError);
-      }
+    if (certifications.length > 0) {
+      await supabaseRequest('POST', 'practitioner_certifications', certifications);
+      console.log(`[API] Created ${certifications.length} certifications`);
     }
 
-    console.log(`[IMPORT] ✓ Complete: ${servicesCount} services, ${certificationsCount} certifications`);
+    console.log('[API] Import successful!');
 
     return NextResponse.json({
       success: true,
-      message: `Imported ${servicesCount} services with ${certificationsCount} certifications`,
       counts: {
-        services: servicesCount,
-        certifications: certificationsCount,
-        practitioners: Object.keys(practitionersMap).length,
+        organizations: 1,
+        practitioners: practitionersResponse.length,
+        services: servicesResponse.length,
+        certifications: certifications.length,
       },
     });
   } catch (error) {
-    console.error('[IMPORT] Fatal error:', error);
+    console.error('[API] Fatal error:', error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      },
+      { error: `Import failed: ${errorMsg}` },
       { status: 500 }
     );
   }
