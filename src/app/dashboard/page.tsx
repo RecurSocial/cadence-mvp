@@ -23,25 +23,71 @@ export default function Dashboard() {
     setIsImporting(true);
     setImportMessage(null);
     try {
+      console.log('[Dashboard] Starting import...');
       const response = await fetch('/api/import-euphoria', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ org_id: orgId }),
       });
       
+      console.log('[Dashboard] API response status:', response.status);
       const data = await response.json();
+      console.log('[Dashboard] API response data:', data);
       
       if (response.ok) {
         setImportMessage(`✓ Imported ${data.counts.services} services, ${data.counts.certifications} certifications, ${data.counts.practitioners} practitioners`);
         // Reload page after 2 seconds
         setTimeout(() => window.location.reload(), 2000);
       } else {
+        console.error('[Dashboard] API error response:', data);
         setImportMessage(`✗ Error: ${data.error}`);
       }
     } catch (error) {
+      console.error('[Dashboard] Import exception:', error);
       setImportMessage(`✗ Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setImportMessage(null);
+
+    try {
+      console.log('[Dashboard] Uploading Excel file:', file.name);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('org_id', orgId);
+
+      const response = await fetch('/api/import-excel', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('[Dashboard] Upload response status:', response.status);
+      const data = await response.json();
+      console.log('[Dashboard] Upload response:', data);
+
+      if (response.ok) {
+        setImportMessage(`✓ ${data.message}`);
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        console.error('[Dashboard] Upload error:', data);
+        setImportMessage(`✗ Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('[Dashboard] Upload exception:', error);
+      setImportMessage(`✗ Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsImporting(false);
+      // Reset file input
+      if (e.currentTarget) {
+        e.currentTarget.value = '';
+      }
     }
   };
 
@@ -54,13 +100,25 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Cadence Office Dashboard</h1>
             <p className="mt-2 text-sm text-gray-600">Manage Services, Practitioners, and Vendors</p>
           </div>
-          <button
-            onClick={handleImportEuphoria}
-            disabled={isImporting}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isImporting ? 'Importing...' : '📥 Import Euphoria Data'}
-          </button>
+          <div className="flex gap-2">
+            <label className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              📤 Upload Excel
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleUploadExcel}
+                disabled={isImporting}
+                style={{ display: 'none' }}
+              />
+            </label>
+            <button
+              onClick={handleImportEuphoria}
+              disabled={isImporting}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isImporting ? 'Importing...' : '📥 Import Sample Data'}
+            </button>
+          </div>
         </div>
         {importMessage && (
           <div className={`max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 ${importMessage.startsWith('✓') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
