@@ -96,21 +96,26 @@ ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 ALTER TABLE practitioners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE practitioner_certifications ENABLE ROW LEVEL SECURITY;
 
--- Simple RLS policies (can be refined later)
-CREATE POLICY "Users can view own org" ON organizations
-  FOR SELECT USING (TRUE);
+-- RLS policies for organizations
+CREATE POLICY "Allow all on organizations" ON organizations
+  FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
-CREATE POLICY "Users can view own org users" ON users
-  FOR SELECT USING (TRUE);
+-- RLS policies for users
+CREATE POLICY "Allow all on users" ON users
+  FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
-CREATE POLICY "Users can view own org vendors" ON vendors
-  FOR SELECT USING (TRUE);
+-- RLS policies for vendors
+CREATE POLICY "Allow all on vendors" ON vendors
+  FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
-CREATE POLICY "Users can view own org services" ON services
-  FOR SELECT USING (TRUE);
+-- RLS policies for services
+CREATE POLICY "Allow all on services" ON services
+  FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
-CREATE POLICY "Users can view own org practitioners" ON practitioners
-  FOR SELECT USING (TRUE);
+-- RLS policies for practitioners
+CREATE POLICY "Allow all on practitioners" ON practitioners
+  FOR ALL USING (TRUE) WITH CHECK (TRUE);
 
-CREATE POLICY "Users can view own org practitioner certifications" ON practitioner_certifications
-  FOR SELECT USING (TRUE);
+-- RLS policies for practitioner_certifications
+CREATE POLICY "Allow all on practitioner_certifications" ON practitioner_certifications
+  FOR ALL USING (TRUE) WITH CHECK (TRUE);

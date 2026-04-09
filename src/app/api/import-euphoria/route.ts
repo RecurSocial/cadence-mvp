@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 
-// Use service role key for admin operations (bypass RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Fallback to anon key if service role not available
-const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY 
-  ? supabaseAdmin
-  : createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-
-// Practitioner mapping from Excel
+// Practitioner mapping
 const PRACTITIONERS = {
   'Brianna Krug': { role: 'Nurse', approval_level: 'owner' },
   'Jaimie Burkett': { role: 'Nurse', approval_level: 'staff' },
@@ -31,6 +19,68 @@ const PRACTITIONERS = {
   'Aubrey Rieger': { role: 'Masseuse', approval_level: 'staff' },
 };
 
+const serviceData = [
+  {
+    category: 'Neurotoxins',
+    name: 'Botox',
+    product: 'Allergan',
+    supplier: 'Varies',
+    duration_minutes: 15,
+    price: 'Based on units',
+    practitioners: ['Brianna Krug', 'Jaimie Burkett', 'Kim Benitez', 'Lexy Fazzone', 'Michelle Wilson', 'Nadine Delia'],
+  },
+  {
+    category: 'Facials',
+    name: 'DiamondGlow',
+    product: 'Aesthetics Biomedical',
+    supplier: 'Aesthetics Biomedical',
+    duration_minutes: 50,
+    price: '$199.00',
+    practitioners: ['Kim Benitez', 'Nicole Roberto', 'Nicole Rekus', 'Tori Grant'],
+  },
+  {
+    category: 'Fillers',
+    name: 'Juvederm',
+    product: 'Allergan',
+    supplier: 'Varies',
+    duration_minutes: 30,
+    price: 'Based on syringe',
+    practitioners: ['Brianna Krug', 'Jaimie Burkett', 'Kim Benitez', 'Lexy Fazzone', 'Michelle Wilson', 'Nadine Delia'],
+  },
+  {
+    category: 'Massage Therapy',
+    name: 'Swedish Massage',
+    product: 'N/A',
+    supplier: 'N/A',
+    duration_minutes: 60,
+    price: '$75.00',
+    practitioners: ['Aubrey Rieger'],
+  },
+];
+
+async function supabaseRequest(method: string, table: string, query: string = '', body?: any) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  
+  const response = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Prefer': 'return=representation',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error(`[SUPABASE] ${method} ${table}${query} failed:`, response.status, errorData);
+    throw new Error(`Supabase request failed: ${response.statusText} - ${errorData}`);
+  }
+
+  const data = await response.json();
+  return data;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { org_id } = await request.json();
@@ -41,49 +91,23 @@ export async function POST(request: NextRequest) {
 
     console.log(`[IMPORT] Starting Euphoria data import for org: ${org_id}`);
 
-    // Step 1: Ensure organization exists
-    console.log(`[IMPORT] Checking organization...`);
-    let orgExists = false;
+    // Step 1: Create organization
     try {
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('id', org_id)
-        .single();
-
-      if (!orgError) {
-        orgExists = true;
-        console.log(`[IMPORT] Organization exists`);
-      }
-    } catch (e) {
-      console.log(`[IMPORT] Org check error (may be normal):`, e);
-    }
-
-    if (!orgExists) {
       console.log(`[IMPORT] Creating organization...`);
-      const { error: createError } = await supabase
-        .from('organizations')
-        .insert([
-          {
-            id: org_id,
-            name: 'Euphoria Esthetics & Wellness',
-            slug: 'euphoria-test',
-            plan_tier: 'starter',
-          },
-        ]);
-
-      if (createError) {
-        console.error(`[IMPORT] Org creation error:`, createError);
-        // Don't throw, continue anyway
-      } else {
-        console.log(`[IMPORT] Organization created`);
-      }
+      await supabaseRequest('POST', 'organizations', '', {
+        id: org_id,
+        name: 'Euphoria Esthetics & Wellness',
+        slug: 'euphoria-test',
+        plan_tier: 'starter',
+      });
+      console.log(`[IMPORT] ✓ Organization created`);
+    } catch (orgError) {
+      console.log(`[IMPORT] Organization may already exist, continuing...`, orgError);
     }
 
     // Step 2: Create practitioners
     console.log(`[IMPORT] Creating practitioners...`);
     const practitionersMap: { [key: string]: string } = {};
-    let practCreatedCount = 0;
 
     for (const [name, { role, approval_level }] of Object.entries(PRACTITIONERS)) {
       const nameParts = name.split(' ');
@@ -91,135 +115,71 @@ export async function POST(request: NextRequest) {
       const lastName = nameParts.slice(1).join(' ') || '';
 
       try {
-        const { data: practData, error: practError } = await supabase
-          .from('practitioners')
-          .insert([
-            {
-              org_id,
-              first_name: firstName,
-              last_name: lastName,
-              role,
-              approval_level,
-              is_active: true,
-            },
-          ])
-          .select();
+        const response = await supabaseRequest('POST', 'practitioners', '', {
+          org_id,
+          first_name: firstName,
+          last_name: lastName,
+          role,
+          approval_level,
+          is_active: true,
+        });
 
-        if (practError) {
-          console.warn(`[IMPORT] Practitioner ${name} error:`, practError.message);
-        } else if (practData && practData.length > 0) {
-          practitionersMap[name] = practData[0].id;
-          practCreatedCount++;
-          console.log(`[IMPORT] Created practitioner: ${name}`);
+        if (Array.isArray(response) && response.length > 0) {
+          practitionersMap[name] = response[0].id;
+          console.log(`[IMPORT] ✓ Created practitioner: ${name}`);
         }
-      } catch (e) {
-        console.error(`[IMPORT] Unexpected error for ${name}:`, e);
+      } catch (practError) {
+        console.log(`[IMPORT] Practitioner ${name} may exist:`, practError);
       }
     }
 
-    // Step 3: Create services and certifications
-    console.log(`[IMPORT] Creating services and certifications...`);
+    console.log(`[IMPORT] Found/created ${Object.keys(practitionersMap).length} practitioners`);
+
+    // Step 3: Create services and link practitioners
+    console.log(`[IMPORT] Creating services...`);
     let servicesCount = 0;
     let certificationsCount = 0;
 
-    const serviceData = [
-      {
-        category: 'Neurotoxins',
-        name: 'Botox',
-        product: 'Allergan',
-        supplier: 'Varies',
-        duration_minutes: 15,
-        price: 'Based on units',
-        practitioners: ['Brianna Krug', 'Jaimie Burkett', 'Kim Benitez', 'Lexy Fazzone', 'Michelle Wilson', 'Nadine Delia'],
-      },
-      {
-        category: 'Facials',
-        name: 'DiamondGlow',
-        product: 'Aesthetics Biomedical',
-        supplier: 'Aesthetics Biomedical',
-        duration_minutes: 50,
-        price: '$199.00',
-        practitioners: ['Kim Benitez', 'Nicole Roberto', 'Nicole Rekus', 'Tori Grant'],
-      },
-      {
-        category: 'Fillers',
-        name: 'Juvederm',
-        product: 'Allergan',
-        supplier: 'Varies',
-        duration_minutes: 30,
-        price: 'Based on syringe',
-        practitioners: ['Brianna Krug', 'Jaimie Burkett', 'Kim Benitez', 'Lexy Fazzone', 'Michelle Wilson', 'Nadine Delia'],
-      },
-      {
-        category: 'Massage Therapy',
-        name: 'Swedish Massage',
-        product: 'N/A',
-        supplier: 'N/A',
-        duration_minutes: 60,
-        price: '$75.00',
-        practitioners: ['Aubrey Rieger'],
-      },
-    ];
-
     for (const service of serviceData) {
       try {
-        const { data: serviceInsertData, error: serviceError } = await supabase
-          .from('services')
-          .insert([
-            {
-              org_id,
-              category: service.category,
-              name: service.name,
-              product: service.product,
-              supplier: service.supplier,
-              duration_minutes: service.duration_minutes,
-              price: service.price,
-            },
-          ])
-          .select();
+        const response = await supabaseRequest('POST', 'services', '', {
+          org_id,
+          category: service.category,
+          name: service.name,
+          product: service.product,
+          supplier: service.supplier,
+          duration_minutes: service.duration_minutes,
+          price: service.price,
+        });
 
-        if (serviceError) {
-          console.warn(`[IMPORT] Service ${service.name} error:`, serviceError.message);
-          continue;
-        }
-
-        if (serviceInsertData && serviceInsertData.length > 0) {
-          const serviceId = serviceInsertData[0].id;
+        if (Array.isArray(response) && response.length > 0) {
+          const serviceId = response[0].id;
           servicesCount++;
-          console.log(`[IMPORT] Created service: ${service.name}`);
+          console.log(`[IMPORT] ✓ Created service: ${service.name}`);
 
           // Create certifications
           for (const practName of service.practitioners) {
             const practId = practitionersMap[practName];
             if (practId) {
               try {
-                const { error: certError } = await supabase
-                  .from('practitioner_certifications')
-                  .insert([
-                    {
-                      practitioner_id: practId,
-                      service_id: serviceId,
-                      certified: true,
-                    },
-                  ]);
-
-                if (!certError) {
-                  certificationsCount++;
-                } else {
-                  console.warn(`[IMPORT] Cert error for ${practName}/${service.name}:`, certError.message);
-                }
-              } catch (e) {
-                console.error(`[IMPORT] Unexpected cert error:`, e);
+                await supabaseRequest('POST', 'practitioner_certifications', '', {
+                  practitioner_id: practId,
+                  service_id: serviceId,
+                  certified: true,
+                });
+                certificationsCount++;
+              } catch (certError) {
+                console.log(`[IMPORT] Cert for ${practName}:`, certError);
               }
             }
           }
         }
-      } catch (e) {
-        console.error(`[IMPORT] Unexpected service error:`, e);
+      } catch (serviceError) {
+        console.error(`[IMPORT] Error creating service ${service.name}:`, serviceError);
       }
     }
 
-    console.log(`[IMPORT] Import complete - Services: ${servicesCount}, Certs: ${certificationsCount}, Practs: ${practCreatedCount}`);
+    console.log(`[IMPORT] ✓ Complete: ${servicesCount} services, ${certificationsCount} certifications`);
 
     return NextResponse.json({
       success: true,
@@ -227,16 +187,14 @@ export async function POST(request: NextRequest) {
       counts: {
         services: servicesCount,
         certifications: certificationsCount,
-        practitioners: practCreatedCount,
+        practitioners: Object.keys(practitionersMap).length,
       },
     });
   } catch (error) {
-    console.error('[IMPORT] Unexpected error:', error);
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[IMPORT] Fatal error:', error);
     return NextResponse.json(
-      { 
-        error: `Import failed: ${errorMsg}`,
-        details: error instanceof Error ? error.stack : undefined
+      {
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
       },
       { status: 500 }
     );
