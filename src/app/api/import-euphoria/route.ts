@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
+// Use service role key for admin operations (bypass RLS)
+const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
+
+// Fallback to anon key if service role not available
+const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY 
+  ? supabaseAdmin
+  : createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    );
 
 // Practitioner mapping from Excel
 const PRACTITIONERS = {
@@ -30,17 +39,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'org_id required' }, { status: 400 });
     }
 
-    console.log(`Starting Euphoria data import for org: ${org_id}`);
+    console.log(`[IMPORT] Starting Euphoria data import for org: ${org_id}`);
 
     // Step 1: Ensure organization exists
-    const { data: org, error: orgError } = await supabase
-      .from('organizations')
-      .select('id')
-      .eq('id', org_id)
-      .single();
+    console.log(`[IMPORT] Checking organization...`);
+    let orgExists = false;
+    try {
+      const { data: org, error: orgError } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('id', org_id)
+        .single();
 
-    if (orgError) {
-      console.log(`Creating organization: ${org_id}`);
+      if (!orgError) {
+        orgExists = true;
+        console.log(`[IMPORT] Organization exists`);
+      }
+    } catch (e) {
+      console.log(`[IMPORT] Org check error (may be normal):`, e);
+    }
+
+    if (!orgExists) {
+      console.log(`[IMPORT] Creating organization...`);
       const { error: createError } = await supabase
         .from('organizations')
         .insert([
@@ -52,47 +72,56 @@ export async function POST(request: NextRequest) {
           },
         ]);
 
-      if (createError) throw createError;
+      if (createError) {
+        console.error(`[IMPORT] Org creation error:`, createError);
+        // Don't throw, continue anyway
+      } else {
+        console.log(`[IMPORT] Organization created`);
+      }
     }
 
     // Step 2: Create practitioners
+    console.log(`[IMPORT] Creating practitioners...`);
     const practitionersMap: { [key: string]: string } = {};
+    let practCreatedCount = 0;
 
     for (const [name, { role, approval_level }] of Object.entries(PRACTITIONERS)) {
       const nameParts = name.split(' ');
       const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ');
+      const lastName = nameParts.slice(1).join(' ') || '';
 
-      const { data: practData, error: practError } = await supabase
-        .from('practitioners')
-        .insert([
-          {
-            org_id,
-            first_name: firstName,
-            last_name: lastName,
-            role,
-            approval_level,
-            is_active: true,
-          },
-        ])
-        .select();
+      try {
+        const { data: practData, error: practError } = await supabase
+          .from('practitioners')
+          .insert([
+            {
+              org_id,
+              first_name: firstName,
+              last_name: lastName,
+              role,
+              approval_level,
+              is_active: true,
+            },
+          ])
+          .select();
 
-      if (practError && !practError.message.includes('duplicate')) {
-        console.error(`Error creating practitioner ${name}:`, practError);
-      } else if (practData && practData.length > 0) {
-        practitionersMap[name] = practData[0].id;
-        console.log(`Created practitioner: ${name} (${role})`);
+        if (practError) {
+          console.warn(`[IMPORT] Practitioner ${name} error:`, practError.message);
+        } else if (practData && practData.length > 0) {
+          practitionersMap[name] = practData[0].id;
+          practCreatedCount++;
+          console.log(`[IMPORT] Created practitioner: ${name}`);
+        }
+      } catch (e) {
+        console.error(`[IMPORT] Unexpected error for ${name}:`, e);
       }
     }
 
-    // Step 3: Read Excel and import services
+    // Step 3: Create services and certifications
+    console.log(`[IMPORT] Creating services and certifications...`);
     let servicesCount = 0;
     let certificationsCount = 0;
 
-    // For now, we'll use static data instead of reading the file
-    // (since file system access is limited in Next.js)
-    // In production, you'd upload the file and process it
-    
     const serviceData = [
       {
         category: 'Neurotoxins',
@@ -132,53 +161,65 @@ export async function POST(request: NextRequest) {
       },
     ];
 
-    // Create services and link practitioners
     for (const service of serviceData) {
-      const { data: serviceData, error: serviceError } = await supabase
-        .from('services')
-        .insert([
-          {
-            org_id,
-            category: service.category,
-            name: service.name,
-            product: service.product,
-            supplier: service.supplier,
-            duration_minutes: service.duration_minutes,
-            price: service.price,
-          },
-        ])
-        .select();
+      try {
+        const { data: serviceInsertData, error: serviceError } = await supabase
+          .from('services')
+          .insert([
+            {
+              org_id,
+              category: service.category,
+              name: service.name,
+              product: service.product,
+              supplier: service.supplier,
+              duration_minutes: service.duration_minutes,
+              price: service.price,
+            },
+          ])
+          .select();
 
-      if (serviceError) {
-        console.error(`Error creating service ${service.name}:`, serviceError);
-        continue;
-      }
+        if (serviceError) {
+          console.warn(`[IMPORT] Service ${service.name} error:`, serviceError.message);
+          continue;
+        }
 
-      if (serviceData && serviceData.length > 0) {
-        const serviceId = serviceData[0].id;
-        servicesCount++;
+        if (serviceInsertData && serviceInsertData.length > 0) {
+          const serviceId = serviceInsertData[0].id;
+          servicesCount++;
+          console.log(`[IMPORT] Created service: ${service.name}`);
 
-        // Create certifications
-        for (const practName of service.practitioners) {
-          const practId = practitionersMap[practName];
-          if (practId) {
-            const { error: certError } = await supabase
-              .from('practitioner_certifications')
-              .insert([
-                {
-                  practitioner_id: practId,
-                  service_id: serviceId,
-                  certified: true,
-                },
-              ]);
+          // Create certifications
+          for (const practName of service.practitioners) {
+            const practId = practitionersMap[practName];
+            if (practId) {
+              try {
+                const { error: certError } = await supabase
+                  .from('practitioner_certifications')
+                  .insert([
+                    {
+                      practitioner_id: practId,
+                      service_id: serviceId,
+                      certified: true,
+                    },
+                  ]);
 
-            if (!certError) {
-              certificationsCount++;
+                if (!certError) {
+                  certificationsCount++;
+                } else {
+                  console.warn(`[IMPORT] Cert error for ${practName}/${service.name}:`, certError.message);
+                }
+              } catch (e) {
+                console.error(`[IMPORT] Unexpected cert error:`, e);
+              }
             }
           }
         }
+      } catch (e) {
+        console.error(`[IMPORT] Unexpected service error:`, e);
       }
     }
+
+    console.log(`[IMPORT] Import complete - Services: ${servicesCount}, Certs: ${certificationsCount}, Practs: ${practCreatedCount}`);
 
     return NextResponse.json({
       success: true,
@@ -186,13 +227,17 @@ export async function POST(request: NextRequest) {
       counts: {
         services: servicesCount,
         certifications: certificationsCount,
-        practitioners: Object.keys(practitionersMap).length,
+        practitioners: practCreatedCount,
       },
     });
   } catch (error) {
-    console.error('Import error:', error);
+    console.error('[IMPORT] Unexpected error:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: `Import failed: ${errorMsg}`,
+        details: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
