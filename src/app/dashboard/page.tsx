@@ -8,6 +8,8 @@ import VendorsDashboard from '@/components/dashboards/VendorsDashboard';
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('services');
   const [orgId, setOrgId] = useState<string>('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Get org_id from localStorage or from URL params
@@ -17,14 +19,54 @@ export default function Dashboard() {
     setOrgId(testOrgId);
   }, []);
 
+  const handleImportEuphoria = async () => {
+    setIsImporting(true);
+    setImportMessage(null);
+    try {
+      const response = await fetch('/api/import-euphoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org_id: orgId }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setImportMessage(`✓ Imported ${data.counts.services} services, ${data.counts.certifications} certifications, ${data.counts.practitioners} practitioners`);
+        // Reload page after 2 seconds
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        setImportMessage(`✗ Error: ${data.error}`);
+      }
+    } catch (error) {
+      setImportMessage(`✗ Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Cadence Office Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-600">Manage Services, Practitioners, and Vendors</p>
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Cadence Office Dashboard</h1>
+            <p className="mt-2 text-sm text-gray-600">Manage Services, Practitioners, and Vendors</p>
+          </div>
+          <button
+            onClick={handleImportEuphoria}
+            disabled={isImporting}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isImporting ? 'Importing...' : '📥 Import Euphoria Data'}
+          </button>
         </div>
+        {importMessage && (
+          <div className={`max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 ${importMessage.startsWith('✓') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+            {importMessage}
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
