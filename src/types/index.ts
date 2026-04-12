@@ -65,6 +65,7 @@ export interface Post {
   hashtags: string | null;
   scheduled_at: string | null;
   platforms: string[];
+  post_type: string | null;
   status: PostStatus;
   created_by: string | null;
   created_at: string;

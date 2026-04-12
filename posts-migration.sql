@@ -24,3 +24,6 @@ CREATE POLICY "Allow all on posts" ON posts
 
 -- Add post_type column
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS post_type TEXT;
+
+-- Rename "Behind the Scenes" to "Behind Scenes"
+UPDATE posts SET post_type = 'Behind Scenes' WHERE post_type = 'Behind the Scenes';

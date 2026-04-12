@@ -19,7 +19,7 @@ const POST_TYPES = [
   'Educational',
   'Before/After',
   'Promotional',
-  'Behind the Scenes',
+  'Behind Scenes',
   'Trending/Viral',
   'Testimonial',
   'Seasonal',
@@ -31,11 +31,14 @@ const POST_TYPE_TIMES: Record<string, { hour: number; minute: string; ampm: stri
   'Educational':        { hour: 11, minute: '00', ampm: 'AM' },
   'Promotional':        { hour: 12, minute: '00', ampm: 'PM' },
   'Before/After':       { hour: 6,  minute: '00', ampm: 'PM' },
-  'Behind the Scenes':  { hour: 9,  minute: '00', ampm: 'AM' },
+  'Behind Scenes':  { hour: 9,  minute: '00', ampm: 'AM' },
   'Trending/Viral':     { hour: 9,  minute: '00', ampm: 'AM' },
   'Testimonial':        { hour: 11, minute: '00', ampm: 'AM' },
   'Seasonal':           { hour: 11, minute: '00', ampm: 'AM' },
 };
+
+const inputClass = 'w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition';
+const labelClass = 'block text-sm font-medium text-[#0F172A] mb-1';
 
 export default function CreatePostModal({ date, onClose, onSave }: CreatePostModalProps) {
   const [caption, setCaption] = useState('');
@@ -90,46 +93,46 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">New Draft Post</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
+          <h3 className="text-base font-semibold text-[#0F172A]">New Draft Post</h3>
+          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#64748B] text-xl leading-none transition">
             &times;
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <p className="text-sm text-gray-500">{dateLabel}</p>
+          <p className="text-sm text-[#64748B]">{dateLabel}</p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Caption</label>
+            <label className={labelClass}>Caption</label>
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={inputClass + ' resize-none'}
               placeholder="Write your post caption..."
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Hashtags</label>
+            <label className={labelClass}>Hashtags</label>
             <input
               type="text"
               value={hashtags}
               onChange={(e) => setHashtags(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="#medspa #beauty #skincare"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Post Type</label>
+            <label className={labelClass}>Post Type</label>
             <select
               value={postType}
               onChange={(e) => handlePostTypeChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
             >
               <option value="">Select post type</option>
               {POST_TYPES.map((type) => (
@@ -139,31 +142,15 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Time</label>
+            <label className={labelClass}>Scheduled Time</label>
             <div className="flex gap-2">
-              <select
-                value={hour}
-                onChange={(e) => setHour(Number(e.target.value))}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {HOURS.map((h) => (
-                  <option key={h} value={h}>{h}</option>
-                ))}
+              <select value={hour} onChange={(e) => setHour(Number(e.target.value))} className={'flex-1 ' + inputClass}>
+                {HOURS.map((h) => (<option key={h} value={h}>{h}</option>))}
               </select>
-              <select
-                value={minute}
-                onChange={(e) => setMinute(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {MINUTES.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
+              <select value={minute} onChange={(e) => setMinute(e.target.value)} className={'flex-1 ' + inputClass}>
+                {MINUTES.map((m) => (<option key={m} value={m}>{m}</option>))}
               </select>
-              <select
-                value={ampm}
-                onChange={(e) => setAmpm(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+              <select value={ampm} onChange={(e) => setAmpm(e.target.value)} className={'flex-1 ' + inputClass}>
                 <option value="AM">AM</option>
                 <option value="PM">PM</option>
               </select>
@@ -171,7 +158,7 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Platforms</label>
+            <label className="block text-sm font-medium text-[#0F172A] mb-2">Platforms</label>
             <div className="flex flex-wrap gap-3">
               {PLATFORMS.map((platform) => (
                 <label key={platform} className="flex items-center gap-2 cursor-pointer">
@@ -179,9 +166,9 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
                     type="checkbox"
                     checked={platforms.includes(platform)}
                     onChange={() => togglePlatform(platform)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-[#E2E8F0] text-[#4F46E5] focus:ring-[#4F46E5]"
                   />
-                  <span className="text-sm text-gray-700">{platform}</span>
+                  <span className="text-sm text-[#0F172A]">{platform}</span>
                 </label>
               ))}
             </div>
@@ -191,14 +178,14 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+              className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
             >
               {saving ? 'Saving...' : 'Save as Draft'}
             </button>

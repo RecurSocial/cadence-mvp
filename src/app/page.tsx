@@ -1,61 +1,60 @@
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">🎯 Cadence MVP</h1>
-          <p className="text-xl text-gray-600">Medical Spa Social Media Execution System</p>
-        </div>
+    <div className="px-8 py-10">
+      {/* Page header */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-[#0F172A]">Welcome to Cadence</h1>
+        <p className="mt-2 text-[#64748B]">Medical Spa Social Media Execution System</p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">✅ Status</h2>
-            <ul className="space-y-2 text-gray-700 text-sm">
-              <li>✅ Dev server running</li>
-              <li>✅ Next.js 16 with TypeScript</li>
-              <li>✅ Tailwind CSS</li>
-              <li>✅ Supabase connected</li>
-            </ul>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">📊 Database</h2>
-            <ul className="space-y-2 text-gray-700 text-sm">
-              <li>✅ Organizations table</li>
-              <li>✅ Services table</li>
-              <li>✅ Practitioners table</li>
-              <li>✅ Vendors table</li>
-            </ul>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">🚀 Phase 1</h2>
-            <ul className="space-y-2 text-gray-700 text-sm">
-              <li>📝 Admin dashboards</li>
-              <li>🔧 Office Dashboard</li>
-              <li>📋 Approval workflow</li>
-              <li>✨ Ready to launch</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">🎯 What Is Cadence?</h2>
-          <p className="text-gray-700 mb-4">Cadence is a <strong>weekly execution system</strong> for medical spas and service businesses.</p>
-          <ul className="space-y-2 text-gray-700 text-sm">
-            <li>✅ Pre-built smart templates (40-60 per vertical)</li>
-            <li>✅ Auto-fill Monday with weekly content drafts</li>
-            <li>✅ Approval workflows (staff → owner)</li>
-            <li>✅ Posts to Instagram, Facebook, TikTok, GBP, YouTube</li>
-            <li>✅ Weekly scorecard & streak tracking</li>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-lg font-semibold text-[#0F172A] mb-4">Status</h2>
+          <ul className="space-y-2.5 text-sm text-[#64748B]">
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Dev server running</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Next.js 16 with TypeScript</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Tailwind CSS</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Supabase connected</li>
           </ul>
         </div>
 
-        <div className="mt-12 text-center">
-          <a href="/dashboard" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg">
-            Go to Dashboard →
-          </a>
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-lg font-semibold text-[#0F172A] mb-4">Database</h2>
+          <ul className="space-y-2.5 text-sm text-[#64748B]">
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Organizations table</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Services table</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Practitioners table</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Vendors table</li>
+          </ul>
         </div>
+
+        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6">
+          <h2 className="text-lg font-semibold text-[#0F172A] mb-4">Phase 1</h2>
+          <ul className="space-y-2.5 text-sm text-[#64748B]">
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#4F46E5]" /> Admin dashboards</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#4F46E5]" /> Office Dashboard</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#4F46E5]" /> Approval workflow</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Ready to launch</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6 mb-10">
+        <h2 className="text-lg font-semibold text-[#0F172A] mb-4">What Is Cadence?</h2>
+        <p className="text-[#64748B] mb-4">Cadence is a <strong className="text-[#0F172A] font-medium">weekly execution system</strong> for medical spas and service businesses.</p>
+        <ul className="space-y-2.5 text-sm text-[#64748B]">
+          <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Pre-built smart templates (40-60 per vertical)</li>
+          <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Auto-fill Monday with weekly content drafts</li>
+          <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Approval workflows (staff to owner)</li>
+          <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Posts to Instagram, Facebook, TikTok, GBP, YouTube</li>
+          <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#10B981]" /> Weekly scorecard and streak tracking</li>
+        </ul>
+      </div>
+
+      <div className="text-center">
+        <a href="/dashboard" className="inline-block bg-[#4F46E5] hover:bg-[#4338CA] text-white font-medium py-2.5 px-6 rounded-lg transition">
+          Go to Dashboard
+        </a>
       </div>
     </div>
   );
