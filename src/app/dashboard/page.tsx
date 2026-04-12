@@ -101,6 +101,12 @@ export default function Dashboard() {
             <p className="mt-2 text-sm text-gray-600">Manage Services, Practitioners, and Vendors</p>
           </div>
           <div className="flex gap-2">
+            <a
+              href="/calendar"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium"
+            >
+              📅 Content Calendar
+            </a>
             <label className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
               📤 Upload Excel
               <input
@@ -131,6 +137,18 @@ export default function Dashboard() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8" aria-label="Tabs">
+            <span className="py-4 px-1 border-b-2 border-blue-500 text-blue-600 font-medium text-sm">
+              <span className="mr-2">⚙️</span>
+              Office Dashboard
+            </span>
+            <a
+              href="/calendar"
+              className="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm"
+            >
+              <span className="mr-2">📅</span>
+              Content Calendar
+            </a>
+            <span className="border-l border-gray-200 mx-2" />
             {[
               { id: 'services', label: 'Services', icon: '⚙️' },
               { id: 'practitioners', label: 'Practitioners', icon: '👤' },

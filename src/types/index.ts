@@ -55,6 +55,22 @@ export interface Vendor {
   updated_at: string;
 }
 
+// Posts
+export type PostStatus = 'draft' | 'pending_review' | 'scheduled' | 'published' | 'rejected';
+
+export interface Post {
+  id: string;
+  org_id: string;
+  caption: string | null;
+  hashtags: string | null;
+  scheduled_at: string | null;
+  platforms: string[];
+  status: PostStatus;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Organization
 export interface Organization {
   id: string;
