@@ -94,7 +94,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const navBtnClass = 'px-3 py-1.5 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-white hover:text-[#0F172A] transition text-sm font-medium';
+  const navBtnClass = 'px-3 py-1.5 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-white hover:text-[#0F172A] transition text-sm font-medium focus:outline-none';
 
   return (
     <div className="space-y-5">
@@ -109,36 +109,51 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
       </div>
 
       {/* Weekly summary bar */}
-      {!loading && (
-        <div className="bg-white border border-[#E2E8F0] rounded-lg px-4 py-3">
-          {posts.length === 0 ? (
-            <p className="text-sm text-[#64748B]">No posts scheduled this week — click any day to get started</p>
-          ) : (
-            <div className="flex items-center gap-2 text-sm">
+      {!loading && (() => {
+        const ALL_POST_TYPES = ['Trending/Viral', 'Educational', 'Before/After', 'Promotional', 'Testimonial', 'Behind Scenes', 'Seasonal'];
+        const counts = posts.reduce((acc, p) => {
+          if (p.post_type) acc[p.post_type] = (acc[p.post_type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const weekThursday = new Date(weekStart);
+        weekThursday.setDate(weekStart.getDate() + 3);
+        const isThursdayOrLater = now >= weekThursday && now <= new Date(weekStart.getTime() + 6 * 86400000);
+
+        return (
+          <div className="bg-white border border-[#E2E8F0] rounded-lg px-4 py-3">
+            <div className="flex items-center gap-3 text-sm flex-wrap">
               <span className="font-medium text-[#0F172A]">{posts.length} post{posts.length !== 1 ? 's' : ''} this week</span>
               <span className="text-[#E2E8F0]">|</span>
-              {Object.entries(
-                posts.reduce((acc, p) => {
-                  const key = p.post_type || '_none';
-                  acc[key] = (acc[key] || 0) + 1;
-                  return acc;
-                }, {} as Record<string, number>)
-              )
-                .filter(([key]) => key !== '_none')
-                .map(([type, count], i, arr) => {
-                  const color = postTypeConfig[type]?.badgeColor || '#64748B';
-                  return (
-                    <span key={type}>
-                      <span style={{ color }} className="font-medium">{count}</span>
-                      <span className="text-[#64748B]"> {type}</span>
-                      {i < arr.length - 1 && <span className="text-[#E2E8F0] mx-1">&middot;</span>}
-                    </span>
-                  );
-                })}
+              {ALL_POST_TYPES.map((type) => {
+                const count = counts[type] || 0;
+                const color = postTypeConfig[type]?.badgeColor || '#64748B';
+                const hasCount = count > 0;
+                return (
+                  <span key={type} className="flex items-center gap-1.5">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: color }}
+                    />
+                    {hasCount ? (
+                      <span className="text-[#0F172A]">
+                        <span className="font-medium">{count}</span> {type}
+                      </span>
+                    ) : (
+                      <span
+                        className={isThursdayOrLater ? 'text-[#EF4444] font-bold italic' : 'text-[#94A3B8]'}
+                      >
+                        {type}
+                      </span>
+                    )}
+                  </span>
+                );
+              })}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        );
+      })()}
 
       {/* Calendar grid */}
       {loading ? (

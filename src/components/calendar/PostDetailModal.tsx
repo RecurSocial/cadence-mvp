@@ -167,7 +167,7 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
                 <div>
                   <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Post Type</p>
                   {post.post_type ? (
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: ptConfig.badgeColor + '26', color: ptConfig.badgeColor }}>{post.post_type}</span>
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: ptConfig.badgeColor + '1A', color: ptConfig.badgeColor }}>{post.post_type}</span>
                   ) : (
                     <p className="text-sm text-[#94A3B8]">None</p>
                   )}

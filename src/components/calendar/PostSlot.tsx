@@ -11,13 +11,13 @@ const statusConfig: Record<PostStatus, { label: string; bg: string; text: string
 };
 
 export const postTypeConfig: Record<string, { cardBg: string; badgeColor: string }> = {
-  'Educational':       { cardBg: '#EEF2FF', badgeColor: '#4F46E5' },
+  'Educational':       { cardBg: '#EFF6FF', badgeColor: '#2563EB' },
   'Promotional':       { cardBg: '#FFFBEB', badgeColor: '#D97706' },
   'Before/After':      { cardBg: '#ECFDF5', badgeColor: '#059669' },
-  'Behind Scenes':     { cardBg: '#F0F9FF', badgeColor: '#0284C7' },
+  'Behind Scenes':     { cardBg: 'rgba(71,85,105,0.10)', badgeColor: '#475569' },
   'Trending/Viral':    { cardBg: '#FFF1F2', badgeColor: '#E11D48' },
   'Testimonial':       { cardBg: '#F5F3FF', badgeColor: '#7C3AED' },
-  'Seasonal':          { cardBg: '#FFF7ED', badgeColor: '#EA580C' },
+  'Seasonal':          { cardBg: 'rgba(245,158,11,0.25)', badgeColor: '#B45309' },
 };
 
 const defaultPostType = { cardBg: '#FFFFFF', badgeColor: '#64748B' };
@@ -46,7 +46,7 @@ export default function PostSlot({ post, onClick }: { post: Post; onClick?: () =
         {post.post_type && (
           <span
             className="text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap"
-            style={{ backgroundColor: ptConfig.badgeColor + '26', color: ptConfig.badgeColor }}
+            style={{ backgroundColor: ptConfig.badgeColor + '1A', color: ptConfig.badgeColor }}
           >
             {displayLabel}
           </span>
