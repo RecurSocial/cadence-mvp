@@ -15,7 +15,7 @@ export default function Dashboard() {
     // Get org_id from localStorage or from URL params
     // For MVP, we'll use a hardcoded org_id for testing
     // In production, this comes from Supabase auth
-    const testOrgId = localStorage.getItem('org_id') || 'test-org-1';
+    const testOrgId = localStorage.getItem('org_id') || '74b04f56-8cf0-7427-b977-7574b183226d';
     setOrgId(testOrgId);
   }, []);
 
