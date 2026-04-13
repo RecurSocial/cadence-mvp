@@ -11,6 +11,7 @@ interface CreatePostModalProps {
     scheduled_at: string;
     platforms: string[];
     post_type: string;
+    submit_for_review?: boolean;
   }) => Promise<void>;
 }
 
@@ -66,21 +67,34 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-
+  const buildScheduledAt = () => {
     let h24 = hour % 12;
     if (ampm === 'PM') h24 += 12;
     const timeStr = `${String(h24).padStart(2, '0')}:${minute}`;
     const dateStr = date.toISOString().split('T')[0];
-    const scheduled_at = new Date(`${dateStr}T${timeStr}:00`).toISOString();
+    return new Date(`${dateStr}T${timeStr}:00`).toISOString();
+  };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
     try {
-      await onSave({ caption, hashtags, scheduled_at, platforms, post_type: postType });
+      await onSave({ caption, hashtags, scheduled_at: buildScheduledAt(), platforms, post_type: postType });
       onClose();
     } catch (error) {
       console.error('Error saving post:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAndSubmit = async () => {
+    setSaving(true);
+    try {
+      await onSave({ caption, hashtags, scheduled_at: buildScheduledAt(), platforms, post_type: postType, submit_for_review: true });
+      onClose();
+    } catch (error) {
+      console.error('Error saving & submitting post:', error);
     } finally {
       setSaving(false);
     }
@@ -185,9 +199,17 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
+              className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#0F172A] hover:bg-[#F8F9FB] text-sm font-medium disabled:opacity-50 transition"
             >
               {saving ? 'Saving...' : 'Save as Draft'}
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveAndSubmit}
+              disabled={saving}
+              className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
+            >
+              {saving ? 'Submitting...' : 'Save & Submit for Review'}
             </button>
           </div>
         </form>

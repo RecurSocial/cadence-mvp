@@ -69,6 +69,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
     scheduled_at: string;
     platforms: string[];
     post_type: string;
+    submit_for_review?: boolean;
   }) => {
     const res = await fetch('/api/posts', {
       method: 'POST',
@@ -79,6 +80,12 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
       const err = await res.json();
       throw new Error(err.error || 'Failed to save post');
     }
+
+    if (data.submit_for_review) {
+      const created = await res.json();
+      await fetch(`/api/posts/${created.id}/submit`, { method: 'POST' });
+    }
+
     await fetchPosts();
   };
 

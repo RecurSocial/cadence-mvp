@@ -72,6 +72,18 @@ export interface Post {
   updated_at: string;
 }
 
+// Post Reviews
+export type ReviewAction = 'submitted' | 'approved' | 'rejected';
+
+export interface PostReview {
+  id: string;
+  post_id: string;
+  reviewer_id: string | null;
+  action: ReviewAction;
+  notes: string | null;
+  created_at: string;
+}
+
 // Organization
 export interface Organization {
   id: string;
