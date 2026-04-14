@@ -18,6 +18,33 @@ export default function ServicesDashboard({ orgId }: { orgId: string }) {
   const [formData, setFormData] = useState({
     name: '', category: '', product: '', supplier: '', duration_minutes: '', price: '',
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+
+  const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setUploadMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('org_id', orgId);
+      const response = await fetch('/api/import-excel', { method: 'POST', body: formData });
+      const data = await response.json();
+      if (response.ok) {
+        setUploadMessage(data.message);
+        fetchServices();
+      } else {
+        setUploadMessage(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      setUploadMessage(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsUploading(false);
+      if (e.currentTarget) e.currentTarget.value = '';
+    }
+  };
 
   const categories = [
     'Neurotoxins','Fillers','Facials','IV Therapy','Injections','CoolSculpting','Spray Tan',
@@ -70,10 +97,28 @@ export default function ServicesDashboard({ orgId }: { orgId: string }) {
           <h2 className="text-xl font-semibold text-[#0F172A]">Services</h2>
           <p className="mt-0.5 text-sm text-[#64748B]">{services.length} services configured</p>
         </div>
-        <button onClick={() => setShowForm(!showForm)} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-          {showForm ? 'Cancel' : '+ Add Service'}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowForm(!showForm)} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+            {showForm ? 'Cancel' : '+ Add Service'}
+          </button>
+          <label className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-lg text-sm font-medium cursor-pointer disabled:opacity-50 transition">
+            {isUploading ? 'Uploading...' : 'Upload Excel'}
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleUploadExcel}
+              disabled={isUploading}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
       </div>
+
+      {uploadMessage && (
+        <div className={`px-4 py-3 rounded-lg text-sm font-medium ${uploadMessage.startsWith('Error') || uploadMessage.startsWith('Upload failed') ? 'bg-[#EF4444]/15 text-[#DC2626]' : 'bg-[#10B981]/15 text-[#059669]'}`}>
+          {uploadMessage}
+        </div>
+      )}
 
       {showForm && (
         <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6">
