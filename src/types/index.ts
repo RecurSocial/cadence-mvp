@@ -67,6 +67,8 @@ export interface Post {
   platforms: string[];
   post_type: string | null;
   status: PostStatus;
+  upload_post_id: string | null;
+  upload_post_status: 'pending' | 'completed' | 'failed' | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -100,6 +102,17 @@ export interface User {
   org_id: string;
   email: string;
   role: "owner" | "staff" | "admin";
+  created_at: string;
+  updated_at: string;
+}
+
+// Org Platforms (Upload-Post connection config)
+export interface OrgPlatform {
+  id: string;
+  org_id: string;
+  upload_post_username: string;
+  facebook_page_id: string | null;
+  connected_platforms: string[];
   created_at: string;
   updated_at: string;
 }

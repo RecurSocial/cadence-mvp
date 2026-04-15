@@ -6,6 +6,9 @@ const resend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 'YOU
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
+const UPLOAD_POST_API_KEY = process.env.UPLOAD_POST_API_KEY;
+const UPLOAD_POST_BASE_URL = 'https://api.upload-post.com';
+
 async function sendStaffNotification(post: Record<string, unknown>, action: 'approved' | 'rejected', notes?: string) {
   const staffEmail = process.env.NOTIFY_STAFF_EMAIL;
   if (!staffEmail || staffEmail === 'YOUR_STAFF_EMAIL_HERE' || !resend) {
@@ -66,6 +69,78 @@ async function sendStaffNotification(post: Record<string, unknown>, action: 'app
   }
 }
 
+// Map Cadence platform names to Upload-Post platform strings
+function mapPlatforms(platforms: string[]): string[] {
+  const mapping: Record<string, string> = {
+    'Instagram': 'instagram',
+    'Facebook': 'facebook',
+    'TikTok': 'tiktok',
+    'GBP': 'google_business',
+  };
+  return platforms
+    .map(p => mapping[p] || p.toLowerCase())
+    .filter(p => ['instagram', 'facebook', 'tiktok', 'google_business'].includes(p));
+}
+
+// Call Upload-Post API to schedule the post
+async function scheduleWithUploadPost(post: Record<string, unknown>): Promise<{ job_id: string | null; error: string | null }> {
+  if (!UPLOAD_POST_API_KEY) {
+    console.warn('[review] UPLOAD_POST_API_KEY not set — skipping Upload-Post call');
+    return { job_id: null, error: 'API key not configured' };
+  }
+
+  const platforms = mapPlatforms((post.platforms as string[]) || []);
+  if (platforms.length === 0) {
+    console.warn('[review] No valid platforms mapped for post:', post.id);
+    return { job_id: null, error: 'No valid platforms' };
+  }
+
+  const profileUsername = post.org_id as string;
+  const caption = [post.caption, post.hashtags].filter(Boolean).join('\n\n') || '';
+  const scheduledAt = post.scheduled_at as string;
+
+  const hasImage = !!(post.image_url as string);
+  const textSupportedPlatforms = ['facebook', 'tiktok', 'google_business', 'x', 'threads', 'bluesky'];
+  const uploadPlatforms = hasImage ? platforms : platforms.filter(p => textSupportedPlatforms.includes(p));
+
+  if (uploadPlatforms.length === 0) {
+    console.warn('[review] No platforms support text-only posts for this post — skipping Upload-Post');
+    return { job_id: null, error: 'No platforms support text-only for this post' };
+  }
+
+  const endpoint = hasImage
+    ? UPLOAD_POST_BASE_URL + '/api/upload_photos'
+    : UPLOAD_POST_BASE_URL + '/api/upload_text';
+
+  const formData = new FormData();
+  formData.append('user', profileUsername);
+  formData.append('title', caption);
+  formData.append('scheduled_date', new Date(scheduledAt).toISOString());
+  formData.append('timezone', 'America/New_York');
+  formData.append('async_upload', 'false');
+  uploadPlatforms.forEach(p => formData.append('platform[]', p));
+
+  console.log('[review] Calling Upload-Post:', endpoint, '| platforms:', uploadPlatforms, '| scheduled:', scheduledAt);
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Authorization': 'Apikey ' + UPLOAD_POST_API_KEY },
+      body: formData,
+    });
+    const data = await res.json();
+    console.log('[review] Upload-Post response:', JSON.stringify(data));
+    if (res.status === 202 && data.job_id) return { job_id: data.job_id, error: null };
+    if (data.request_id) return { job_id: data.request_id, error: null };
+    if (data.success) return { job_id: null, error: null };
+    return { job_id: null, error: data.message || 'Unknown Upload-Post error' };
+  } catch (err) {
+    console.error('[review] Upload-Post fetch error:', err);
+    return { job_id: null, error: String(err) };
+  }
+}
+
+
 // POST /api/posts/[id]/review — approve or reject a post
 export async function POST(
   request: Request,
@@ -123,6 +198,32 @@ export async function POST(
 
     if (reviewError) {
       console.error('[POST /api/posts/[id]/review] Review insert error:', reviewError);
+    }
+
+    // If approved — schedule with Upload-Post
+    if (action === 'approved') {
+      const { job_id, error: uploadError } = await scheduleWithUploadPost(post);
+
+      if (uploadError) {
+        console.warn('[review] Upload-Post scheduling failed:', uploadError, '| post still marked scheduled in Cadence');
+      }
+
+      if (job_id) {
+        const { error: jobUpdateError } = await supabase
+          .from('posts')
+          .update({
+            upload_post_id: job_id,
+            upload_post_status: 'pending',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id);
+
+        if (jobUpdateError) {
+          console.error('[review] Failed to store upload_post_id:', jobUpdateError);
+        } else {
+          console.log('[review] Stored upload_post_id:', job_id, '| post:', id);
+        }
+      }
     }
 
     // Send staff notification (fire-and-forget)
