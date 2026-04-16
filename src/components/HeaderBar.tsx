@@ -12,7 +12,7 @@ const SEED_USERS = [
 ];
 
 export default function HeaderBar() {
-  const { userId, email, role, loading } = useCurrentUser();
+  const { userId, displayName, email, role, loading } = useCurrentUser();
   const [showSwitcher, setShowSwitcher] = useState(false);
 
   if (loading) {
@@ -25,7 +25,7 @@ export default function HeaderBar() {
 
   return (
     <header className="h-12 bg-white border-b border-[#E2E8F0] flex items-center justify-end px-6 gap-3 relative">
-      <span className="text-sm text-[#64748B]">{email || 'Unknown user'}</span>
+      <span className="text-sm text-[#64748B]">{displayName || email || 'Unknown user'}</span>
       <RoleBadge role={role} />
 
       {/* Dev user switcher */}
