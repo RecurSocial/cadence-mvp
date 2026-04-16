@@ -5,10 +5,15 @@ import ServicesDashboard from '@/components/dashboards/ServicesDashboard';
 import PractitionersDashboard from '@/components/dashboards/PractitionersDashboard';
 import VendorsDashboard from '@/components/dashboards/VendorsDashboard';
 import ExecutionScoreCards from '@/components/dashboards/ExecutionScoreCards';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { canManagePractitioners } from '@/lib/auth/permissions';
 
 export default function Dashboard() {
+  const { role } = useCurrentUser();
   const [activeTab, setActiveTab] = useState('services');
   const [orgId, setOrgId] = useState<string>('');
+
+  const canViewTabs = canManagePractitioners(role);
 
   useEffect(() => {
     const testOrgId = localStorage.getItem('org_id') || '74b04f56-8cf0-7427-b977-7574b183226d';
@@ -26,33 +31,37 @@ export default function Dashboard() {
       {/* Execution score cards */}
       {orgId && <ExecutionScoreCards orgId={orgId} />}
 
-      {/* Sub-tabs */}
-      <div className="border-b border-[#E2E8F0] mb-8">
-        <nav className="flex gap-6" aria-label="Tabs">
-          {[
-            { id: 'services', label: 'Services' },
-            { id: 'practitioners', label: 'Practitioners' },
-            { id: 'vendors', label: 'Vendors' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`pb-3 text-sm font-medium border-b-2 transition ${
-                activeTab === tab.id
-                  ? 'border-[#4F46E5] text-[#4F46E5]'
-                  : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-[#E2E8F0]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      {/* Sub-tabs — Owner/Admin only */}
+      {canViewTabs && (
+        <>
+          <div className="border-b border-[#E2E8F0] mb-8">
+            <nav className="flex gap-6" aria-label="Tabs">
+              {[
+                { id: 'services', label: 'Services' },
+                { id: 'practitioners', label: 'Practitioners' },
+                { id: 'vendors', label: 'Vendors' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`pb-3 text-sm font-medium border-b-2 transition ${
+                    activeTab === tab.id
+                      ? 'border-[#4F46E5] text-[#4F46E5]'
+                      : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-[#E2E8F0]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
 
-      {/* Tab Content */}
-      {activeTab === 'services' && <ServicesDashboard orgId={orgId} />}
-      {activeTab === 'practitioners' && <PractitionersDashboard orgId={orgId} />}
-      {activeTab === 'vendors' && <VendorsDashboard orgId={orgId} />}
+          {/* Tab Content */}
+          {activeTab === 'services' && <ServicesDashboard orgId={orgId} />}
+          {activeTab === 'practitioners' && <PractitionersDashboard orgId={orgId} />}
+          {activeTab === 'vendors' && <VendorsDashboard orgId={orgId} />}
+        </>
+      )}
     </div>
   );
 }

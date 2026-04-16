@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Post } from '@/types';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { canApproveReject } from '@/lib/auth/permissions';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -18,6 +20,8 @@ function getMonday(d: Date): Date {
 const ACTIVE_STATUSES = new Set(['scheduled', 'pending_review', 'published']);
 
 export default function ExecutionScoreCards({ orgId }: { orgId: string }) {
+  const { role } = useCurrentUser();
+  const isReviewer = canApproveReject(role);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -131,12 +135,16 @@ export default function ExecutionScoreCards({ orgId }: { orgId: string }) {
           <span className="text-sm text-[#64748B]">posts awaiting approval</span>
         </div>
         {pendingCount > 0 ? (
-          <a
-            href="/approvals"
-            className="inline-block px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium transition"
-          >
-            Review Now
-          </a>
+          isReviewer ? (
+            <a
+              href="/approvals"
+              className="inline-block px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium transition"
+            >
+              Review Now
+            </a>
+          ) : (
+            <p className="text-sm text-[#64748B]">Awaiting owner or admin review</p>
+          )
         ) : (
           <p className="text-sm font-medium text-green-700">✅ No posts pending approval</p>
         )}
