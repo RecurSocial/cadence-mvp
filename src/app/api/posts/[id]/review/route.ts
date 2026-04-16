@@ -1,4 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
+import { getRequestContext, forbidden } from '@/lib/auth/server';
+import { canApproveReject } from '@/lib/auth/permissions';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
@@ -9,10 +11,18 @@ const resend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 'YOU
 const UPLOAD_POST_API_KEY = process.env.UPLOAD_POST_API_KEY;
 const UPLOAD_POST_BASE_URL = 'https://api.upload-post.com';
 
-async function sendStaffNotification(post: Record<string, unknown>, action: 'approved' | 'rejected', notes?: string) {
-  const staffEmail = process.env.NOTIFY_STAFF_EMAIL;
+async function sendAuthorNotification(post: Record<string, unknown>, action: 'approved' | 'rejected', notes?: string) {
+  // Look up the post author's email
+  let staffEmail: string | null = null;
+  if (post.created_by) {
+    const { getUserEmail } = await import('@/lib/notifications/recipients');
+    staffEmail = await getUserEmail(post.created_by as string);
+  }
+  if (!staffEmail) {
+    staffEmail = process.env.NOTIFY_STAFF_EMAIL || null;
+  }
   if (!staffEmail || staffEmail === 'YOUR_STAFF_EMAIL_HERE' || !resend) {
-    console.log(`[Notification] Would notify staff (${action}):`, staffEmail || 'not configured');
+    console.log(`[Notification] Would notify author (${action}):`, staffEmail || 'not configured');
     return;
   }
 
@@ -147,11 +157,17 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ctx = await getRequestContext(request);
+    if (ctx && !canApproveReject(ctx.role)) {
+      return forbidden('Only owners and admins can approve or reject posts');
+    }
+
     const supabase = createServerClient();
     const { id } = await params;
     const body = await request.json();
 
-    const { action, notes, reviewer_id } = body;
+    const { action, notes } = body;
+    const reviewer_id = ctx?.userId || body.reviewer_id;
 
     if (!action || !['approved', 'rejected'].includes(action)) {
       return NextResponse.json(
@@ -228,7 +244,7 @@ export async function POST(
 
     // Send staff notification (fire-and-forget)
     try {
-      await sendStaffNotification(post, action, notes);
+      await sendAuthorNotification(post, action, notes);
     } catch (emailErr) {
       console.error('[POST /api/posts/[id]/review] Email notification error:', emailErr);
     }

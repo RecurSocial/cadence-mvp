@@ -1,5 +1,6 @@
 // NOTE: CRON_SECRET must be added to Vercel environment variables before deploying.
 import { createServerClient } from '@/lib/supabase/server';
+import { getRecipientsByRole } from '@/lib/notifications/recipients';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
@@ -52,10 +53,10 @@ export async function GET(request: Request) {
       timeZone: 'UTC',
     });
 
-    const ownerEmail = process.env.NOTIFY_OWNER_EMAIL;
-    if (!ownerEmail || ownerEmail === 'YOUR_OWNER_EMAIL_HERE') {
-      console.log('[gap-alert] NOTIFY_OWNER_EMAIL not configured');
-      return NextResponse.json({ message: 'Gap found but no owner email configured', day: dayLabel });
+    const recipients = await getRecipientsByRole(ORG_ID, 'admin');
+    if (recipients.length === 0) {
+      console.log('[gap-alert] No owner/admin recipients found');
+      return NextResponse.json({ message: 'Gap found but no recipients configured', day: dayLabel });
     }
 
     if (!resend) {
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
 
     const { error: emailError } = await resend.emails.send({
       from: 'Cadence <noreply@notifications.cadencesocial.io>',
-      to: ownerEmail,
+      to: recipients,
       subject: 'Gap alert — no posts scheduled for tomorrow',
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto;">

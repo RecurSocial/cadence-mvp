@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Post } from '@/types';
 import { postTypeConfig } from '@/components/calendar/PostSlot';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { canApproveReject } from '@/lib/auth/permissions';
 
 const PLATFORMS = ['Instagram', 'Facebook', 'TikTok', 'GBP'];
 const POST_TYPES = ['Educational', 'Before/After', 'Promotional', 'Behind Scenes', 'Trending/Viral', 'Testimonial', 'Seasonal'];
@@ -31,6 +33,7 @@ function parse12Hour(date: Date) {
 }
 
 export default function ApprovalsPage() {
+  const { orgId: ctxOrgId, role: userRole } = useCurrentUser();
   const [orgId, setOrgId] = useState('');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,10 +46,12 @@ export default function ApprovalsPage() {
   } | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
 
+  const isReviewer = canApproveReject(userRole);
+
   useEffect(() => {
-    const id = localStorage.getItem('org_id') || '74b04f56-8cf0-7427-b977-7574b183226d';
+    const id = ctxOrgId || localStorage.getItem('org_id') || '74b04f56-8cf0-7427-b977-7574b183226d';
     setOrgId(id);
-  }, []);
+  }, [ctxOrgId]);
 
   const fetchPendingPosts = useCallback(async () => {
     if (!orgId) return;
@@ -237,7 +242,9 @@ export default function ApprovalsPage() {
 
                       {/* Actions */}
                       <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
-                        {!isRejecting ? (
+                        {!isReviewer ? (
+                          <p className="text-sm text-[#94A3B8] text-right">Waiting for owner or admin review</p>
+                        ) : !isRejecting ? (
                           <div className="flex gap-2 justify-end">
                             <button onClick={() => startEditing(post)} disabled={isProcessing} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium disabled:opacity-50 transition">Edit</button>
                             <button onClick={() => { setRejectingId(post.id); setRejectNotes(''); }} disabled={isProcessing} className="px-4 py-2 border border-[#EF4444] text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg text-sm font-medium disabled:opacity-50 transition">Reject</button>

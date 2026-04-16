@@ -5,6 +5,7 @@ import { Post } from '@/types';
 import PostSlot, { postTypeConfig } from './PostSlot';
 import CreatePostModal from './CreatePostModal';
 import PostDetailModal from './PostDetailModal';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 function getMonday(d: Date): Date {
   const date = new Date(d);
@@ -32,6 +33,7 @@ function formatDateRange(monday: Date): string {
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
+  const { userId, role: userRole } = useCurrentUser();
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +65,12 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
   const nextWeek = () => { setWeekStart((prev) => { const d = new Date(prev); d.setDate(d.getDate() + 7); return d; }); };
   const goToday = () => setWeekStart(getMonday(new Date()));
 
+  const authHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(userId ? { 'x-user-id': userId } : {}),
+    ...(orgId ? { 'x-org-id': orgId } : {}),
+  };
+
   const handleSavePost = async (data: {
     caption: string;
     hashtags: string;
@@ -70,10 +78,11 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
     platforms: string[];
     post_type: string;
     submit_for_review?: boolean;
+    publish_directly?: boolean;
   }) => {
     const res = await fetch('/api/posts', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders,
       body: JSON.stringify({ org_id: orgId, ...data }),
     });
     if (!res.ok) {
@@ -81,9 +90,20 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
       throw new Error(err.error || 'Failed to save post');
     }
 
-    if (data.submit_for_review) {
-      const created = await res.json();
-      await fetch(`/api/posts/${created.id}/submit`, { method: 'POST' });
+    const created = await res.json();
+
+    if (data.publish_directly) {
+      // Owner/Admin: approve immediately to schedule via Upload-Post
+      await fetch(`/api/posts/${created.id}/review`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ action: 'approved', reviewer_id: userId }),
+      });
+    } else if (data.submit_for_review) {
+      await fetch(`/api/posts/${created.id}/submit`, {
+        method: 'POST',
+        headers: authHeaders,
+      });
     }
 
     await fetchPosts();
@@ -204,7 +224,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
       )}
 
       {modalDate && (
-        <CreatePostModal date={modalDate} onClose={() => setModalDate(null)} onSave={handleSavePost} />
+        <CreatePostModal date={modalDate} userRole={userRole} onClose={() => setModalDate(null)} onSave={handleSavePost} />
       )}
 
       {selectedPost && (

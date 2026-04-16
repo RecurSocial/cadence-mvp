@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server';
+import { getRecipientsByRole } from '@/lib/notifications/recipients';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
@@ -27,10 +28,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    const ownerEmail = process.env.NOTIFY_OWNER_EMAIL;
-    if (!ownerEmail || ownerEmail === 'YOUR_OWNER_EMAIL_HERE') {
-      console.log('[Notification] NOTIFY_OWNER_EMAIL not configured');
-      return NextResponse.json({ sent: false, reason: 'Owner email not configured' });
+    // Send to all owners and admins
+    const recipients = await getRecipientsByRole(org_id, 'admin');
+    if (recipients.length === 0) {
+      console.log('[Notification] No owner/admin recipients found');
+      return NextResponse.json({ sent: false, reason: 'No recipients configured' });
     }
 
     const scheduledDate = post.scheduled_at
@@ -42,14 +44,14 @@ export async function POST(request: Request) {
       : 'No caption';
 
     if (!resend) {
-      console.log('[Notification] Resend not configured. Would have sent to:', ownerEmail);
+      console.log('[Notification] Resend not configured. Would have sent to:', recipients);
       console.log('[Notification] Post details:', { post_type: post.post_type, scheduledDate, captionPreview });
       return NextResponse.json({ sent: false, reason: 'Resend not configured' });
     }
 
     const { error } = await resend.emails.send({
       from: 'Cadence <noreply@notifications.cadencesocial.io>',
-      to: ownerEmail,
+      to: recipients,
       subject: 'New post pending review — Cadence',
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto;">

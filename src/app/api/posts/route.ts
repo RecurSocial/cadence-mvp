@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabase/server';
+import { getRequestContext } from '@/lib/auth/server';
 import { NextResponse } from 'next/server';
 
 // GET /api/posts?org_id=...&week_start=...&week_end=...
@@ -55,6 +56,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const ctx = await getRequestContext(request);
+
     const { data, error } = await supabase
       .from('posts')
       .insert([
@@ -66,6 +69,7 @@ export async function POST(request: Request) {
           platforms: platforms || [],
           post_type: post_type || null,
           status: 'draft',
+          created_by: ctx?.userId || null,
         },
       ])
       .select();

@@ -96,14 +96,29 @@ export interface Organization {
   updated_at: string;
 }
 
+// Roles
+export type UserRole = 'owner' | 'admin' | 'staff';
+
 // User
 export interface User {
   id: string;
   org_id: string;
   email: string;
-  role: "owner" | "staff" | "admin";
+  /** @deprecated Use user_orgs.role instead */
+  role: UserRole;
   created_at: string;
   updated_at: string;
+}
+
+// User-Org membership (authoritative source for role)
+export interface UserOrg {
+  id: string;
+  user_id: string;
+  org_id: string;
+  role: UserRole;
+  practitioner_id: string | null;
+  created_at: string;
+  created_by: string | null;
 }
 
 // Org Platforms (Upload-Post connection config)

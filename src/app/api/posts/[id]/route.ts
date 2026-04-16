@@ -1,4 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server';
+import { getRequestContext, forbidden } from '@/lib/auth/server';
+import { canDeletePost, canEditPost } from '@/lib/auth/permissions';
 import { NextResponse } from 'next/server';
 
 // PUT /api/posts/[id] — update a post
@@ -10,6 +12,16 @@ export async function PUT(
     const supabase = createServerClient();
     const { id } = await params;
     const body = await request.json();
+
+    // Permission check: staff can only edit own drafts/pending posts
+    const ctx = await getRequestContext(request);
+    if (ctx) {
+      const { data: post } = await supabase.from('posts').select('created_by, status').eq('id', id).single();
+      const isAuthor = post?.created_by === ctx.userId;
+      if (!canEditPost(ctx.role, isAuthor, post?.status)) {
+        return forbidden('You can only edit your own draft or pending posts');
+      }
+    }
 
     const { caption, hashtags, scheduled_at, platforms, post_type, status } = body;
 
@@ -42,10 +54,15 @@ export async function PUT(
 
 // DELETE /api/posts/[id] — delete a post
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ctx = await getRequestContext(request);
+    if (ctx && !canDeletePost(ctx.role)) {
+      return forbidden('Only owners and admins can delete posts');
+    }
+
     const supabase = createServerClient();
     const { id } = await params;
 

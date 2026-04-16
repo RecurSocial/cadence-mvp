@@ -1,11 +1,12 @@
-import { createClient } from "@/lib/supabase/client";
-import { Practitioner } from "@/types";
+import { createServerClient } from "@/lib/supabase/server";
+import { getRequestContext, forbidden } from "@/lib/auth/server";
+import { canManagePractitioners } from "@/lib/auth/permissions";
 import { NextResponse } from "next/server";
 
 // GET /api/practitioners - List all practitioners for org
 export async function GET(request: Request) {
   try {
-    const supabase = createClient();
+    const supabase = createServerClient();
     const { searchParams } = new URL(request.url);
     const orgId = searchParams.get("org_id");
 
@@ -36,47 +37,15 @@ export async function GET(request: Request) {
   }
 }
 
-// GET /api/practitioners/:id - Get practitioner with certifications
-export async function GET_DETAIL(request: Request, { params }: { params: { id: string } }) {
-  try {
-    const supabase = createClient();
-    const id = params.id;
-
-    const { data: practitioner, error: practError } = await supabase
-      .from("practitioners")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (practError) {
-      return NextResponse.json({ error: practError.message }, { status: 500 });
-    }
-
-    const { data: certifications, error: certError } = await supabase
-      .from("practitioner_certifications")
-      .select("*")
-      .eq("practitioner_id", id);
-
-    if (certError) {
-      return NextResponse.json({ error: certError.message }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      ...practitioner,
-      certifications,
-    });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
 // POST /api/practitioners - Create new practitioner
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
+    const ctx = await getRequestContext(request);
+    if (ctx && !canManagePractitioners(ctx.role)) {
+      return forbidden("Only owners and admins can manage practitioners");
+    }
+
+    const supabase = createServerClient();
     const body = await request.json();
 
     const { org_id, first_name, last_name, role, email, phone, approval_level } = body;
@@ -120,7 +89,12 @@ export async function POST(request: Request) {
 // PUT /api/practitioners - Update practitioner
 export async function PUT(request: Request) {
   try {
-    const supabase = createClient();
+    const ctx = await getRequestContext(request);
+    if (ctx && !canManagePractitioners(ctx.role)) {
+      return forbidden("Only owners and admins can manage practitioners");
+    }
+
+    const supabase = createServerClient();
     const body = await request.json();
 
     const { id, first_name, last_name, role, email, phone, approval_level } = body;
@@ -162,7 +136,12 @@ export async function PUT(request: Request) {
 // DELETE /api/practitioners - Soft delete practitioner
 export async function DELETE(request: Request) {
   try {
-    const supabase = createClient();
+    const ctx = await getRequestContext(request);
+    if (ctx && !canManagePractitioners(ctx.role)) {
+      return forbidden("Only owners and admins can manage practitioners");
+    }
+
+    const supabase = createServerClient();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

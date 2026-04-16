@@ -1,5 +1,6 @@
 // NOTE: CRON_SECRET must be added to Vercel environment variables before deploying.
 import { createServerClient } from '@/lib/supabase/server';
+import { getRecipientsByRole } from '@/lib/notifications/recipients';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
@@ -71,10 +72,10 @@ export async function GET(request: Request) {
       return `<tr><td style="padding: 8px 12px; color: #0F172A;">✅ ${g.day}, ${dateLabel}</td><td style="padding: 8px 12px; color: #64748B;">${g.count} post${g.count !== 1 ? 's' : ''} scheduled</td></tr>`;
     }).join('');
 
-    const ownerEmail = process.env.NOTIFY_OWNER_EMAIL;
-    if (!ownerEmail || ownerEmail === 'YOUR_OWNER_EMAIL_HERE') {
-      console.log('[weekly-digest] NOTIFY_OWNER_EMAIL not configured');
-      return NextResponse.json({ message: 'Gaps found but no owner email configured', gaps });
+    const recipients = await getRecipientsByRole(ORG_ID, 'admin');
+    if (recipients.length === 0) {
+      console.log('[weekly-digest] No owner/admin recipients found');
+      return NextResponse.json({ message: 'Gaps found but no recipients configured', gaps });
     }
 
     if (!resend) {
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
 
     const { error: emailError } = await resend.emails.send({
       from: 'Cadence <noreply@notifications.cadencesocial.io>',
-      to: ownerEmail,
+      to: recipients,
       subject: 'Weekly planning digest — gaps in your content schedule',
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 480px; margin: 0 auto;">

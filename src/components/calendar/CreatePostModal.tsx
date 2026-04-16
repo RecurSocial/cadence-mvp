@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import type { UserRole } from '@/lib/auth/permissions';
+import { canPublishDirectly } from '@/lib/auth/permissions';
 
 interface CreatePostModalProps {
   date: Date;
+  userRole?: UserRole | null;
   onClose: () => void;
   onSave: (data: {
     caption: string;
@@ -12,6 +15,7 @@ interface CreatePostModalProps {
     platforms: string[];
     post_type: string;
     submit_for_review?: boolean;
+    publish_directly?: boolean;
   }) => Promise<void>;
 }
 
@@ -41,7 +45,8 @@ const POST_TYPE_TIMES: Record<string, { hour: number; minute: string; ampm: stri
 const inputClass = 'w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition';
 const labelClass = 'block text-sm font-medium text-[#0F172A] mb-1';
 
-export default function CreatePostModal({ date, onClose, onSave }: CreatePostModalProps) {
+export default function CreatePostModal({ date, userRole, onClose, onSave }: CreatePostModalProps) {
+  const isPublisher = canPublishDirectly(userRole ?? null);
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [hour, setHour] = useState(11);
@@ -95,6 +100,18 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
       onClose();
     } catch (error) {
       console.error('Error saving & submitting post:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setSaving(true);
+    try {
+      await onSave({ caption, hashtags, scheduled_at: buildScheduledAt(), platforms, post_type: postType, publish_directly: true });
+      onClose();
+    } catch (error) {
+      console.error('Error publishing post:', error);
     } finally {
       setSaving(false);
     }
@@ -203,14 +220,35 @@ export default function CreatePostModal({ date, onClose, onSave }: CreatePostMod
             >
               {saving ? 'Saving...' : 'Save as Draft'}
             </button>
-            <button
-              type="button"
-              onClick={handleSaveAndSubmit}
-              disabled={saving}
-              className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
-            >
-              {saving ? 'Submitting...' : 'Save & Submit for Review'}
-            </button>
+            {isPublisher ? (
+              <div className="flex flex-col items-end gap-1">
+                <button
+                  type="button"
+                  onClick={handlePublish}
+                  disabled={saving}
+                  className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
+                >
+                  {saving ? 'Publishing...' : 'Publish'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAndSubmit}
+                  disabled={saving}
+                  className="text-xs text-[#64748B] hover:text-[#4F46E5] transition"
+                >
+                  Submit for Review instead
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSaveAndSubmit}
+                disabled={saving}
+                className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
+              >
+                {saving ? 'Submitting...' : 'Submit for Review'}
+              </button>
+            )}
           </div>
         </form>
       </div>
