@@ -20,16 +20,12 @@ export async function GET(request: Request) {
     }
 
     const supabase = createServerClient();
-    const { data, error } = await supabase
+
+    // Separate queries to avoid ambiguous FK join
+    // (user_orgs has both user_id and created_by referencing users)
+    const { data: orgRows, error } = await supabase
       .from('user_orgs')
-      .select(`
-        id,
-        role,
-        practitioner_id,
-        created_at,
-        users!inner(id, email),
-        practitioners(first_name, last_name)
-      `)
+      .select('id, user_id, role, practitioner_id, created_at')
       .eq('org_id', orgId)
       .order('created_at');
 
@@ -38,18 +34,41 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const members = (data || []).map((row: Record<string, unknown>) => {
-      const user = row.users as { id: string; email: string };
-      const practitioner = row.practitioners as { first_name: string; last_name: string } | null;
-      return {
-        id: row.id,
-        user_id: user.id,
-        email: user.email,
-        role: row.role,
-        practitioner_name: practitioner ? `${practitioner.first_name} ${practitioner.last_name}` : null,
-        created_at: row.created_at,
-      };
-    });
+    if (!orgRows || orgRows.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    // Batch-fetch user emails
+    const userIds = orgRows.map((r) => r.user_id);
+    const { data: users } = await supabase
+      .from('users')
+      .select('id, email')
+      .in('id', userIds);
+
+    const emailMap = new Map((users || []).map((u) => [u.id, u.email]));
+
+    // Batch-fetch linked practitioners
+    const practIds = orgRows.map((r) => r.practitioner_id).filter(Boolean) as string[];
+    let practMap = new Map<string, string>();
+    if (practIds.length > 0) {
+      const { data: practitioners } = await supabase
+        .from('practitioners')
+        .select('id, first_name, last_name')
+        .in('id', practIds);
+
+      practMap = new Map(
+        (practitioners || []).map((p) => [p.id, `${p.first_name} ${p.last_name}`])
+      );
+    }
+
+    const members = orgRows.map((row) => ({
+      id: row.id,
+      user_id: row.user_id,
+      email: emailMap.get(row.user_id) || null,
+      role: row.role,
+      practitioner_name: row.practitioner_id ? (practMap.get(row.practitioner_id) || null) : null,
+      created_at: row.created_at,
+    }));
 
     return NextResponse.json(members);
   } catch (err) {
