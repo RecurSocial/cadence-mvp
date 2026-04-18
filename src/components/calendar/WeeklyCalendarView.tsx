@@ -109,6 +109,42 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
     await fetchPosts();
   };
 
+  const handleSaveCampaign = async (campaignPosts: any[]) => {
+    for (const post of campaignPosts) {
+      // Build scheduled_at from suggested_date and suggested_time
+      const scheduledAt = new Date(post.suggested_date + 'T' + (post.suggested_time || '10:00') + ':00').toISOString();
+      const platform = post.platform ? post.platform.charAt(0).toUpperCase() + post.platform.slice(1) : 'Instagram';
+      const hashtags = post.hashtags ? post.hashtags.map((h: string) => '#' + h).join(' ') : '';
+
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          org_id: orgId,
+          caption: post.caption,
+          hashtags,
+          scheduled_at: scheduledAt,
+          platforms: [platform],
+          post_type: 'Event',
+          submit_for_review: true,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        console.error('Failed to save campaign post:', err);
+        continue;
+      }
+
+      const created = await res.json();
+      await fetch('/api/posts/' + created.id + '/submit', {
+        method: 'POST',
+        headers: authHeaders,
+      });
+    }
+    await fetchPosts();
+  };
+
   const dayPosts: Post[][] = Array.from({ length: 7 }, () => []);
   for (const post of posts) {
     if (!post.scheduled_at) continue;
@@ -224,7 +260,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
       )}
 
       {modalDate && (
-        <CreatePostModal date={modalDate} userRole={userRole} onClose={() => setModalDate(null)} onSave={handleSavePost} />
+        <CreatePostModal date={modalDate} userRole={userRole} onClose={() => setModalDate(null)} onSave={handleSavePost} onSaveCampaign={handleSaveCampaign} />
       )}
 
       {selectedPost && (

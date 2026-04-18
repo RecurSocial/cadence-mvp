@@ -223,7 +223,7 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="rounded-t-xl px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between" style={{ borderTop: `3px solid ${ptConfig.badgeColor}` }}>
           <div>
@@ -235,7 +235,7 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
           <button onClick={onClose} className="text-[#94A3B8] hover:text-[#64748B] text-xl leading-none transition">&times;</button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {/* Confirm Delete */}
           {mode === 'confirmDelete' && (
             <div className="space-y-4">
