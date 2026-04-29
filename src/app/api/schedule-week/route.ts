@@ -8,22 +8,48 @@ import { NextResponse } from 'next/server';
  * Generates 5 reasoned post recommendations for the upcoming week
  * based on Cadence's locked weekly content strategy:
  *
- * Mon 11:00 AM - Educational (Carousel)
- * Tue 2:00 PM  - Before/After (Reel)
- * Wed 11:00 AM - Service/Product Feature (Reel or Carousel)
- * Thu 12:30 PM - Practitioner Spotlight OR Seasonal (alternates biweekly)
- * Fri 10:00 AM - Trend/Viral (Reel)
+ * Mon 11:00 AM - Educational           (Carousel)
+ * Tue 2:00 PM  - BeforeAfter           (Reel)
+ * Wed 11:00 AM - Educational           (Reel) — service-focused angle
+ * Thu 12:30 PM - Spotlight OR PromoEventSeasonal (alternates biweekly)
+ * Fri 10:00 AM - TrendViral            (Reel)
+ *
+ * Post types align with the new 6-button PostWizard structure:
+ *   Educational, BeforeAfter, Spotlight, PromoEventSeasonal, BookNow, TrendViral.
  *
  * Creates draft posts in the database with is_cadence_suggested = TRUE.
  * If suggestions already exist for the week, they are replaced.
  */
 
+// Matches supabase enum post_type_enum (created in migratio20260429120000).
+type PostType =
+  | 'Educational'
+  | 'BeforeAfter'
+  | 'Spotlight'
+  | 'PromoEventSeasonal'
+  | 'BookNow'
+  | 'TrendViral';
+
 type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday';
+
+// Optional sub-branch hint for the wizard. Used by the Monday Brief UI
+// to pre-select the right sub-question when a user clicks a suggested slot.
+type SubBranch =
+  | 'Product'           // Educational sub-branch
+  | 'Service'           // Educational sub-branch
+  | 'Photo'             // BeforeAfter sub-branch
+  | 'Video'             // BeforeAfter sub-branch
+  | 'Practitioner'      // Spotlight sub-branch
+  | 'Testimonial'       // Spotlight sub-branch
+  | 'Promo'             // PromoEventSeasonal sub-branch
+  | 'Event'             // PromoEventSeasonal sub-branch
+  | 'Seasonal';         // PromoEventSeasonal sub-branch
 
 interface PostRecommendation {
   day: DayOfWeek;
   scheduled_at: string; // ISO timestamp
-  post_type: string;
+  post_type: PostType;
+  sub_branch: SubBranch | null;
   recommended_format: string;
   reasoning: string;
 }
@@ -52,10 +78,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // Determine if this week shows Practitioner Spotlight or Seasonal
-    // We alternate based on ISO week number: even weeks = Practitioner, odd = Seasonal
+    // Determine Thursday's post type and sub-branch.
+    // Even ISO weeks → Spotlight (Practitioner). Odd weeks → PromoEventSeasonal (Seasonal).
     const weekNumber = getISOWeekNumber(weekStart);
-    const thursdayPostType = weekNumber % 2 === 0 ? 'Practitioner Spotlight' : 'Seasonal';
+    const thursdayIsSpotlight = weekNumber % 2 === 0;
+    const thursdayPostType: PostType = thursdayIsSpotlight ? 'Spotlight' : 'PromoEventSeasonal';
+    const thursdaySubBranch: SubBranch = thursdayIsSpotlight ? 'Practitioner' : 'Seasonal';
 
     // Build the 5 recommendations
     const recommendations: PostRecommendation[] = [
@@ -63,47 +91,55 @@ export async function POST(request: Request) {
         day: 'monday',
         scheduled_at: setTime(weekStart, 0, 11, 0), // Monday 11:00 AM
         post_type: 'Educational',
+        sub_branch: null,
         recommended_format: 'Carousel',
-        reasoning: 'Educational Monday establishes authority and builds trust before mid-week conversion content.',
+        reasoning:
+          'Educational Monday establishes authority and builds trust before mid-week conversion content.',
       },
       {
         day: 'tuesday',
         scheduled_at: setTime(weekStart, 1, 14, 0), // Tuesday 2:00 PM
-        post_type: 'Before/After',
+        post_type: 'BeforeAfter',
+        sub_branch: 'Video',
         recommended_format: 'Reel',
-        reasoning: 'Tuesday afternoon captures peak engagement when audiences scroll between meetings. Reels showing the reveal moment outperform static before/after photos.',
+        reasoning:
+          'Tuesday afternoon captures peak engagement when audiences scroll between meetings. Reels showing the reveal moment outperform static before/after photos.',
       },
       {
         day: 'wednesday',
         scheduled_at: setTime(weekStart, 2, 11, 0), // Wednesday 11:00 AM
-        post_type: 'Service Feature',
+        post_type: 'Educational',
+        sub_branch: 'Service',
         recommended_format: 'Reel',
-        reasoning: 'Mid-week deep-dive on a specific service drives Thursday and Friday booking activity.',
+        reasoning:
+          'Mid-week service-focused educational post drives Thursday and Friday booking activity. Service deep-dive frames the procedure, recovery, and results.',
       },
       {
         day: 'thursday',
         scheduled_at: setTime(weekStart, 3, 12, 30), // Thursday 12:30 PM
         post_type: thursdayPostType,
-        recommended_format: thursdayPostType === 'Practitioner Spotlight' ? 'Reel' : 'Carousel',
-        reasoning:
-          thursdayPostType === 'Practitioner Spotlight'
-            ? 'Thursday spotlight builds personal connection with the practitioners patients trust. Alternates with Seasonal content biweekly.'
-            : 'Thursday seasonal post ties Euphoria to current cultural moments. Alternates with Practitioner Spotlight biweekly.',
+        sub_branch: thursdaySubBranch,
+        recommended_format: thursdayIsSpotlight ? 'Reel' : 'Carousel',
+        reasoning: thursdayIsSpotlight
+          ? 'Thursday spotlight builds personal connection with the practitioners patients trust. Alternates biweekly with seasonal content.'
+          : 'Thursday seasonal post ties Euphoria to current cultural moments. Alternates biweekly with practitioner spotlights.',
       },
       {
         day: 'friday',
         scheduled_at: setTime(weekStart, 4, 10, 0), // Friday 10:00 AM
-        post_type: 'Trend/Viral',
+        post_type: 'TrendViral',
+        sub_branch: null,
         recommended_format: 'Reel',
-        reasoning: 'Friday morning trend post reaches new audiences outside Euphoria\'s following. Trends only work as Reels.',
+        reasoning:
+          "Friday morning trend post reaches new audiences outside Euphoria's following. Trends only work as Reels.",
       },
     ];
 
     // Connect to Supabase
     const supabase = await createServerClient();
 
-    // Step 1: Delete any existing Cadence-suggested posts for this week
-    // This makes Schedule My Week idempotent - re-running it replaces old suggestions
+    // Step 1: Delete any existing Cadence-suggested posts for this week.
+    // Makes Schedule My Week idempotent — re-running it replaces old suggestions.
     const weekEndDate = new Date(weekStart);
     weekEndDate.setDate(weekEndDate.getDate() + 7);
 
@@ -118,19 +154,23 @@ export async function POST(request: Request) {
     if (deleteError) {
       console.error('Error deleting existing suggestions:', deleteError);
       return NextResponse.json(
-        { error: 'Failed to clear existing suggestions' },
+        { error: 'Failed to clear existing suggestns' },
         { status: 500 }
       );
     }
 
-    // Step 2: Insert new suggested posts
+    // Step 2: Insert new suggested posts.
+    // sub_branch is folded into suggestion_reasoning so the cron-generated post
+    // carries the intent without requiring a new column in this PR.
     const postsToInsert = recommendations.map((rec) => ({
       org_id: orgId,
       post_type: rec.post_type,
       scheduled_at: rec.scheduled_at,
       status: 'draft',
       is_cadence_suggested: true,
-      suggestion_reasoning: rec.reasoning,
+      suggestion_reasoning: rec.sub_branch
+        ? `[${rec.sub_branch}] ${rec.reasoning}`
+        : rec.reasoning,
       recommended_format: rec.recommended_format,
       platforms: ['instagram', 'facebook'],
       caption: null,
@@ -151,11 +191,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // Return the recommendations with their database IDs
+    // Return the recommendations with their database IDs.
     return NextResponse.json({
       success: true,
       week_start: weekStart.toISOString(),
       thursday_post_type: thursdayPostType,
+      thursday_sub_branch: thursdaySubBranch,
       recommendations: insertedPosts,
     });
   } catch (error) {
@@ -180,7 +221,7 @@ function setTime(baseDate: Date, dayOffset: number, hour: number, minute: number
 
 /**
  * Helper: Get ISO week number (1-53) for a given date.
- * Used to determine biweekly alternation between Practitioner Spotlight and Seasonal.
+ * Used to determine biweekly alternation between Spotlight and PromoEventSeasonal.
  */
 function getISOWeekNumber(date: Date): number {
   const target = new Date(date.valueOf());
