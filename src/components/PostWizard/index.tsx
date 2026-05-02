@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import BeforeAfterBranch from './BeforeAfterBranch'
+import SpotlightBranch from './SpotlightBranch'
 
 const ORG_ID = '74b04f56-8cf0-7427-b977-7574b183226d'
 
@@ -55,6 +57,13 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
   const [consentConfirmed, setConsentConfirmed] = useState(false)
   const [isEventCampaign, setIsEventCampaign] = useState(false)
 
+  // Step 3 — new fields for refactored branches (Sprint 1)
+  const [patientQuote, setPatientQuote] = useState('')
+  const [beforeAfterMode, setBeforeAfterMode] = useState<'photo' | 'video'>('photo')
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoDescription, setVideoDescription] = useState('')
+  const [spotlightMode, setSpotlightMode] = useState<'practitioner' | 'testimonial'>('practitioner')
+
   // Step 4
   const [tone, setTone] = useState('warm')
 
@@ -107,6 +116,11 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
             trend_url: trendUrl || undefined,
             key_benefit: keyBenefit || undefined,
             consent_confirmed: consentConfirmed,
+            patient_quote: patientQuote || undefined,
+            before_after_mode: postType === 'before_after' ? beforeAfterMode : undefined,
+            video_url: videoUrl || undefined,
+            video_description: videoDescription || undefined,
+            spotlight_mode: postType === 'spotlight' ? spotlightMode : undefined,
           }),
         })
         const data = await res.json()
@@ -124,7 +138,15 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
   const canProceedStep2 = postType !== ''
   const canProceedStep3 = () => {
     if (postType === 'event') return eventName && eventDate
-    if (postType === 'before_after') return serviceId && consentConfirmed
+    if (postType === 'before_after') {
+      const baseValid = serviceId && consentConfirmed
+      if (beforeAfterMode === 'video') return baseValid && videoUrl
+      return baseValid
+    }
+    if (postType === 'spotlight') {
+      if (spotlightMode === 'practitioner') return !!practitionerId
+      return !!serviceId && consentConfirmed
+    }
     if (postType === 'trend_viral') return trendDescription || trendUrl
     return true
   }
@@ -275,29 +297,53 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
     )
 
     if (postType === 'before_after') return (
-      <div className="space-y-4">
-        {serviceSelect('Which treatment?')}
-        {practitionerSelect('Which practitioner performed it?')}
-        <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <input
-            type="checkbox"
-            id="consent"
-            checked={consentConfirmed}
-            onChange={e => setConsentConfirmed(e.target.checked)}
-            className="mt-0.5"
-          />
-          <label htmlFor="consent" className="text-sm text-amber-800">
-            <span className="font-semibold">I confirm client consent has been obtained</span> to share before & after photos on social media. Required for HIPAA compliance.
-          </label>
-        </div>
-      </div>
+      <BeforeAfterBranch
+        services={services}
+        practitioners={practitioners}
+        serviceId={serviceId}
+        setServiceId={setServiceId}
+        practitionerId={practitionerId}
+        setPractitionerId={setPractitionerId}
+        consentConfirmed={consentConfirmed}
+        setConsentConfirmed={setConsentConfirmed}
+        targetConcern={targetConcern}
+        setTargetConcern={setTargetConcern}
+        patientQuote={patientQuote}
+        setPatientQuote={setPatientQuote}
+        beforeAfterMode={beforeAfterMode}
+        setBeforeAfterMode={setBeforeAfterMode}
+        videoUrl={videoUrl}
+        setVideoUrl={setVideoUrl}
+        videoDescription={videoDescription}
+        setVideoDescription={setVideoDescription}
+        spotlightMode={spotlightMode}
+        setSpotlightMode={setSpotlightMode}
+      />
     )
 
-    if (postType === 'practitioner_spotlight') return (
-      <div className="space-y-4">
-        {practitionerSelect('Who are we spotlighting?')}
-        <p className="text-xs text-gray-500">Cadence will automatically pull their certifications and specialties from your database to personalize the content.</p>
-      </div>
+    if (postType === 'spotlight') return (
+      <SpotlightBranch
+        services={services}
+        practitioners={practitioners}
+        serviceId={serviceId}
+        setServiceId={setServiceId}
+        practitionerId={practitionerId}
+        setPractitionerId={setPractitionerId}
+        consentConfirmed={consentConfirmed}
+        setConsentConfirmed={setConsentConfirmed}
+        targetConcern={targetConcern}
+        setTargetConcern={setTargetConcern}
+        patientQuote={patientQuote}
+        setPatientQuote={setPatientQuote}
+        beforeAfterMode={beforeAfterMode}
+        setBeforeAfterMode={setBeforeAfterMode}
+        videoUrl={videoUrl}
+        setVideoUrl={setVideoUrl}
+        videoDescription={videoDescription}
+        setVideoDescription={setVideoDescription}
+        spotlightMode={spotlightMode}
+        setSpotlightMode={setSpotlightMode}
+      />
     )
 
     if (postType === 'service_feature') return (
