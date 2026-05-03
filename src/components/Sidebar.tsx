@@ -26,11 +26,13 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-60 bg-[#1E293B] flex flex-col z-40">
-      {/* Logo */}
-      <div className="px-6 py-6 border-b border-white/10">
-        <span className="text-xl font-bold text-white tracking-tight">Cadence</span>
-        <span className="ml-1 text-xs font-medium text-indigo-400">MVP</span>
+    <aside className="fixed inset-y-0 left-0 w-60 bg-cream-bg border-r border-sand-border flex flex-col z-40">
+      {/* Wordmark */}
+      <div className="px-6 py-6 border-b border-sand-border">
+        <p className="font-display text-2xl text-ink-primary leading-none">Cadence</p>
+        <p className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-muted">
+          by RecurSocial
+        </p>
       </div>
 
       {/* Navigation */}
@@ -43,8 +45,8 @@ export default function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
                 isActive
-                  ? 'bg-[#4F46E5] text-white'
-                  : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                  ? 'bg-bone-surface text-ink-primary'
+                  : 'text-ink-muted hover:bg-bone-surface hover:text-ink-primary'
               }`}
             >
               <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -57,8 +59,8 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-white/10">
-        <p className="text-xs text-gray-500">Euphoria Esthetics & Wellness</p>
+      <div className="px-6 py-4 border-t border-sand-border">
+        <p className="text-xs text-ink-muted">Euphoria Esthetics &amp; Wellness</p>
       </div>
     </aside>
   );
