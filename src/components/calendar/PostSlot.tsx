@@ -3,11 +3,11 @@
 import { Post, PostStatus } from '@/types';
 
 const statusConfig: Record<PostStatus, { label: string; bg: string; text: string }> = {
-  draft: { label: 'Draft', bg: 'bg-[#64748B]/15', text: 'text-[#64748B]' },
-  pending_review: { label: 'Pending', bg: 'bg-[#F59E0B]/15', text: 'text-[#D97706]' },
-  scheduled: { label: 'Scheduled', bg: 'bg-[#4F46E5]/15', text: 'text-[#4F46E5]' },
-  published: { label: 'Published', bg: 'bg-[#10B981]/15', text: 'text-[#059669]' },
-  rejected: { label: 'Rejected', bg: 'bg-[#EF4444]/15', text: 'text-[#DC2626]' },
+  draft:          { label: 'Draft',     bg: 'bg-ink-muted/15',   text: 'text-ink-muted' },
+  pending_review: { label: 'Pending',   bg: 'bg-warning/15',     text: 'text-warning' },
+  scheduled:      { label: 'Scheduled', bg: 'bg-brand-gold/20',  text: 'text-gold-dark' },
+  published:      { label: 'Published', bg: 'bg-success/15',     text: 'text-success' },
+  rejected:       { label: 'Rejected',  bg: 'bg-alert/15',       text: 'text-alert' },
 };
 
 export const postTypeConfig: Record<string, { cardBg: string; badgeColor: string }> = {
@@ -35,7 +35,7 @@ export default function PostSlot({ post, onClick }: { post: Post; onClick?: () =
 
   return (
     <div
-      className="border border-[#E2E8F0] rounded-lg p-2 mb-2 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-md transition cursor-pointer"
+      className="border border-sand-border rounded-lg p-2 mb-2 shadow-[0_1px_2px_rgba(42,36,25,0.06)] hover:shadow-[0_2px_6px_rgba(42,36,25,0.10)] transition cursor-pointer"
       style={{ backgroundColor: ptConfig.cardBg }}
       onClick={(e) => { e.stopPropagation(); onClick?.(); }}
     >
@@ -51,13 +51,13 @@ export default function PostSlot({ post, onClick }: { post: Post; onClick?: () =
             {displayLabel}
           </span>
         )}
-        {time && <span className="text-[11px] text-[#94A3B8] ml-auto">{time}</span>}
+        {time && <span className="text-[11px] text-ink-muted ml-auto">{time}</span>}
       </div>
-      <p className="text-sm text-[#0F172A] line-clamp-2">{post.caption || 'No caption'}</p>
+      <p className="text-sm text-ink-primary line-clamp-2">{post.caption || 'No caption'}</p>
       {post.platforms && post.platforms.length > 0 && (
         <div className="flex gap-1 mt-1.5 flex-wrap">
           {post.platforms.map((p) => (
-            <span key={p} className="text-[11px] bg-white/60 text-[#64748B] px-1.5 py-0.5 rounded font-medium">
+            <span key={p} className="text-[11px] bg-cream-bg/70 text-ink-muted px-1.5 py-0.5 rounded font-medium">
               {p}
             </span>
           ))}
