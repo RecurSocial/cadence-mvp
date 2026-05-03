@@ -33,18 +33,6 @@
   /* Typography — Spec v1.2 §1.4 */
   --font-display: 'Playfair Display', Georgia, serif;
   --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
-
-  /*
-   * Legacy semantic aliases consumed by /settings/brand-kit/page.tsx.
-   * That page is locked unchanged in this scope (Step 7 of the kickoff),
-   * so the names stay; they now resolve to the cream-and-gold tokens
-   * above, not indigo.
-   */
-  --text-primary:   var(--ink-primary);
-  --text-secondary: var(--ink-muted);
-  --border:         var(--sand-border);
-  --card-bg:        var(--bone-surface);
-  --table-alt-row:  var(--bone-surface);
 }
 
 @theme inline {
