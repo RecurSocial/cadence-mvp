@@ -19,8 +19,8 @@ const POST_TYPE_TIMES: Record<string, { hour: number; minute: string; ampm: stri
   'Seasonal':           { hour: 11, minute: '00', ampm: 'AM' },
 };
 
-const inputClass = 'w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition';
-const labelClass = 'block text-sm font-medium text-[#0F172A] mb-1';
+const inputClass = 'w-full px-3.5 py-2.5 bg-cream-bg border border-sand-border rounded-lg text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition';
+const labelClass = 'block text-sm font-medium text-ink-primary mb-1';
 
 function parse12Hour(date: Date): { hour: number; minute: string; ampm: string } {
   let h = date.getHours();
@@ -211,38 +211,38 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
     setMode('view');
   };
 
-  // Status label config
-  const statusDisplay: Record<string, { label: string; color: string; bg: string }> = {
-    draft: { label: 'Draft', color: '#64748B', bg: 'bg-[#64748B]/15' },
-    pending_review: { label: 'Awaiting Approval', color: '#D97706', bg: 'bg-[#F59E0B]/15' },
-    scheduled: { label: 'Scheduled', color: '#059669', bg: 'bg-[#10B981]/15' },
-    published: { label: 'Published', color: '#059669', bg: 'bg-[#10B981]/15' },
-    rejected: { label: 'Rejected', color: '#DC2626', bg: 'bg-[#EF4444]/15' },
+  // Status label config — uses semantic tokens aligned to cream
+  const statusDisplay: Record<string, { label: string; cls: string }> = {
+    draft:          { label: 'Draft',             cls: 'bg-ink-muted/15 text-ink-muted' },
+    pending_review: { label: 'Awaiting Approval', cls: 'bg-warning/15 text-warning' },
+    scheduled:      { label: 'Scheduled',         cls: 'bg-brand-gold/20 text-gold-dark' },
+    published:      { label: 'Published',         cls: 'bg-success/15 text-success' },
+    rejected:       { label: 'Rejected',          cls: 'bg-alert/15 text-alert' },
   };
   const statusInfo = statusDisplay[post.status] || statusDisplay.draft;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-primary/40 backdrop-blur-sm">
+      <div className="bg-bone-surface border border-sand-border rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="rounded-t-xl px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between" style={{ borderTop: `3px solid ${ptConfig.badgeColor}` }}>
+        <div className="rounded-t-xl px-6 py-4 border-b border-sand-border flex items-center justify-between" style={{ borderTop: `3px solid ${ptConfig.badgeColor}` }}>
           <div>
-            <h3 className="text-base font-semibold text-[#0F172A]">
+            <h3 className="font-display text-xl text-ink-primary">
               {mode === 'edit' ? 'Edit Post' : mode === 'confirmDelete' ? 'Delete Post' : 'Post Details'}
             </h3>
-            <p className="text-sm text-[#64748B] mt-0.5">{dateLabel} at {timeLabel}</p>
+            <p className="text-sm text-ink-muted mt-0.5">{dateLabel} at {timeLabel}</p>
           </div>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-[#64748B] text-xl leading-none transition">&times;</button>
+          <button onClick={onClose} className="text-ink-muted hover:text-ink-primary text-xl leading-none transition">&times;</button>
         </div>
 
         <div className="p-6 overflow-y-auto flex-1">
           {/* Confirm Delete */}
           {mode === 'confirmDelete' && (
             <div className="space-y-4">
-              <p className="text-sm text-[#0F172A]">Are you sure you want to delete this post? This action cannot be undone.</p>
+              <p className="text-sm text-ink-primary">Are you sure you want to delete this post? This action cannot be undone.</p>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setMode('view')} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition">Cancel</button>
-                <button onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
+                <button onClick={() => setMode('view')} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition">Cancel</button>
+                <button onClick={handleDelete} disabled={saving} className="px-4 py-2 bg-alert hover:bg-critical text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
                   {saving ? 'Deleting...' : 'Confirm Delete'}
                 </button>
               </div>
@@ -254,49 +254,49 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
             <div className="space-y-4">
               {/* Status badge */}
               <div>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusInfo.bg}`} style={{ color: statusInfo.color }}>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusInfo.cls}`}>
                   {statusInfo.label}
                 </span>
               </div>
 
               {/* Rejection notes */}
               {post.status === 'rejected' && rejectionNotes && (
-                <div className="bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg px-4 py-3">
-                  <p className="text-xs font-medium text-[#DC2626] uppercase tracking-wider mb-1">Rejection Reason</p>
-                  <p className="text-sm text-[#0F172A]">{rejectionNotes}</p>
+                <div className="bg-alert/10 border border-alert/30 rounded-lg px-4 py-3">
+                  <p className="text-xs font-medium text-alert uppercase tracking-wider mb-1">Rejection Reason</p>
+                  <p className="text-sm text-ink-primary">{rejectionNotes}</p>
                 </div>
               )}
 
               <div>
-                <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Caption</p>
-                <p className="text-sm text-[#0F172A] whitespace-pre-wrap">{post.caption || 'No caption'}</p>
+                <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Caption</p>
+                <p className="text-sm text-ink-primary whitespace-pre-wrap">{post.caption || 'No caption'}</p>
               </div>
               {post.hashtags && (
                 <div>
-                  <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Hashtags</p>
-                  <p className="text-sm text-[#4F46E5]">{post.hashtags}</p>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Hashtags</p>
+                  <p className="text-sm text-gold-dark">{post.hashtags}</p>
                 </div>
               )}
               <div className="flex gap-8">
                 <div>
-                  <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Post Type</p>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Post Type</p>
                   {post.post_type ? (
                     <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: ptConfig.badgeColor + '1A', color: ptConfig.badgeColor }}>{post.post_type}</span>
                   ) : (
-                    <p className="text-sm text-[#94A3B8]">None</p>
+                    <p className="text-sm text-ink-muted">None</p>
                   )}
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Status</p>
-                  <p className="text-sm text-[#0F172A] capitalize">{post.status.replace('_', ' ')}</p>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Status</p>
+                  <p className="text-sm text-ink-primary capitalize">{post.status.replace('_', ' ')}</p>
                 </div>
               </div>
               {post.platforms && post.platforms.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Platforms</p>
+                  <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Platforms</p>
                   <div className="flex gap-1.5 flex-wrap">
                     {post.platforms.map((p) => (
-                      <span key={p} className="text-xs bg-[#F1F5F9] text-[#64748B] px-2 py-1 rounded font-medium">{p}</span>
+                      <span key={p} className="text-xs bg-cream-bg border border-sand-border text-ink-muted px-2 py-1 rounded font-medium">{p}</span>
                     ))}
                   </div>
                 </div>
@@ -304,32 +304,32 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
 
               {/* Status message */}
               {statusMessage && (
-                <div className="bg-[#4F46E5]/10 border border-[#4F46E5]/20 rounded-lg px-4 py-3">
-                  <p className="text-sm text-[#4F46E5] font-medium">{statusMessage}</p>
+                <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-lg px-4 py-3">
+                  <p className="text-sm text-gold-dark font-medium">{statusMessage}</p>
                 </div>
               )}
 
               {/* Footer actions — status-aware */}
-              <div className="flex gap-3 justify-end pt-2 border-t border-[#E2E8F0]">
+              <div className="flex gap-3 justify-end pt-2 border-t border-sand-border">
                 {post.status === 'draft' && (
                   <>
-                    <button onClick={() => setMode('confirmDelete')} className="px-4 py-2 border border-[#EF4444] rounded-lg text-[#EF4444] hover:bg-[#EF4444]/10 text-sm font-medium transition">Delete</button>
-                    <button onClick={() => setMode('edit')} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition">Edit</button>
-                    <button onClick={handleSubmitForReview} disabled={saving} className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
+                    <button onClick={() => setMode('confirmDelete')} className="px-4 py-2 border border-alert rounded-lg text-alert hover:bg-alert/10 text-sm font-medium transition">Delete</button>
+                    <button onClick={() => setMode('edit')} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition">Edit</button>
+                    <button onClick={handleSubmitForReview} disabled={saving} className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
                       {saving ? 'Submitting...' : 'Submit for Review'}
                     </button>
                   </>
                 )}
                 {post.status === 'rejected' && (
                   <>
-                    <button onClick={() => setMode('confirmDelete')} className="px-4 py-2 border border-[#EF4444] rounded-lg text-[#EF4444] hover:bg-[#EF4444]/10 text-sm font-medium transition">Delete</button>
-                    <button onClick={handleReviseAndResubmit} disabled={saving} className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
+                    <button onClick={() => setMode('confirmDelete')} className="px-4 py-2 border border-alert rounded-lg text-alert hover:bg-alert/10 text-sm font-medium transition">Delete</button>
+                    <button onClick={handleReviseAndResubmit} disabled={saving} className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
                       {saving ? 'Reverting...' : 'Revise & Resubmit'}
                     </button>
                   </>
                 )}
                 {post.status === 'scheduled' && (
-                  <button onClick={() => setMode('edit')} className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium transition">Edit</button>
+                  <button onClick={() => setMode('edit')} className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium transition">Edit</button>
                 )}
                 {/* pending_review shows no action buttons */}
               </div>
@@ -370,22 +370,22 @@ export default function PostDetailModal({ post, onClose, onUpdate }: PostDetailM
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#0F172A] mb-2">Platforms</label>
+                <label className="block text-sm font-medium text-ink-primary mb-2">Platforms</label>
                 <div className="flex flex-wrap gap-3">
                   {PLATFORMS.map((platform) => (
                     <label key={platform} className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={platforms.includes(platform)} onChange={() => togglePlatform(platform)} className="rounded border-[#E2E8F0] text-[#4F46E5] focus:ring-[#4F46E5]" />
-                      <span className="text-sm text-[#0F172A]">{platform}</span>
+                      <input type="checkbox" checked={platforms.includes(platform)} onChange={() => togglePlatform(platform)} className="rounded border-sand-border text-brand-gold focus:ring-brand-gold" />
+                      <span className="text-sm text-ink-primary">{platform}</span>
                     </label>
                   ))}
                 </div>
               </div>
-              <div className="flex gap-3 justify-end pt-2 border-t border-[#E2E8F0]">
-                <button onClick={handleCancel} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition">Cancel</button>
-                <button onClick={handleSave} disabled={saving} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#0F172A] hover:bg-[#F8F9FB] text-sm font-medium disabled:opacity-50 transition">
+              <div className="flex gap-3 justify-end pt-2 border-t border-sand-border">
+                <button onClick={handleCancel} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition">Cancel</button>
+                <button onClick={handleSave} disabled={saving} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium disabled:opacity-50 transition">
                   {saving ? 'Saving...' : 'Save as Draft'}
                 </button>
-                <button onClick={handleSaveAndSubmitForReview} disabled={saving} className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
+                <button onClick={handleSaveAndSubmitForReview} disabled={saving} className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">
                   {saving ? 'Submitting...' : 'Save & Submit for Review'}
                 </button>
               </div>

@@ -487,26 +487,26 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
   const canProceed = [canProceedStep1, canProceedStep2, canProceedStep3(), true]
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-ink-primary/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-bone-surface border border-sand-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b border-sand-border">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">✨ Create Post with AI</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Step {step} of 4 — {stepTitles[step - 1]}</p>
+            <h2 className="font-display text-xl text-ink-primary">Create Post with AI</h2>
+            <p className="text-sm text-ink-muted mt-0.5">Step {step} of 4 — {stepTitles[step - 1]}</p>
           </div>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+          <button onClick={onCancel} className="text-ink-muted hover:text-ink-primary text-xl leading-none transition">×</button>
         </div>
 
         {/* Progress bar */}
-        <div className="h-1 bg-gray-100">
+        <div className="h-1 bg-sand-border/40">
           <div
-            className="h-full bg-blue-500 transition-all duration-300"
+            className="h-full bg-brand-gold transition-all duration-300"
             style={{ width: `${(step / 4) * 100}%` }}
           />
         </div>
 
-        {/* Step content */}
+        {/* Step content (wizard internals — not restyled in this scope; taxonomy refactor will replace) */}
         <div className="flex-1 overflow-y-auto p-6">
           {step === 1 && renderStep1()}
           {step === 2 && renderStep2()}
@@ -516,16 +516,16 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
 
         {/* Error */}
         {error && (
-          <div className="mx-6 mb-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div className="mx-6 mb-2 p-3 bg-alert/10 border border-alert/30 rounded-lg text-sm text-alert">
             {error}
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t bg-gray-50 rounded-b-xl">
+        <div className="flex items-center justify-between p-6 border-t border-sand-border bg-cream-bg rounded-b-xl">
           <button
             onClick={() => step > 1 ? setStep(s => s - 1) : onCancel()}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+            className="px-4 py-2 text-sm text-ink-muted hover:text-ink-primary transition"
           >
             {step > 1 ? '← Back' : 'Cancel'}
           </button>
@@ -533,7 +533,7 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
             <button
               onClick={() => setStep(s => s + 1)}
               disabled={!canProceed[step - 1]}
-              className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-brand-gold hover:bg-gold-dark text-white text-sm font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               Next →
             </button>
@@ -541,12 +541,12 @@ export default function PostWizard({ services, practitioners, onComplete, onCanc
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-40 flex items-center gap-2"
+              className="px-6 py-2 bg-brand-gold hover:bg-gold-dark text-white text-sm font-medium rounded-lg disabled:opacity-40 flex items-center gap-2 transition"
             >
               {loading ? (
                 <><span className="animate-spin">⟳</span> Generating...</>
               ) : (
-                '✨ Generate Post'
+                'Generate Post'
               )}
             </button>
           )}

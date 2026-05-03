@@ -50,8 +50,8 @@ const POST_TYPE_TIMES: Record<string, { hour: number; minute: string; ampm: stri
   'Event':          { hour: 10, minute: '00', ampm: 'AM' },
 };
 
-const inputClass = 'w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition';
-const labelClass = 'block text-sm font-medium text-[#0F172A] mb-1';
+const inputClass = 'w-full px-3.5 py-2.5 bg-cream-bg border border-sand-border rounded-lg text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition';
+const labelClass = 'block text-sm font-medium text-ink-primary mb-1';
 
 export default function CreatePostModal({ date, userRole, onClose, onSave, onSaveCampaign }: CreatePostModalProps) {
   const isPublisher = canPublishDirectly(userRole ?? null);
@@ -215,30 +215,30 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
         </div>
       )}
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
-            <h3 className="text-base font-semibold text-[#0F172A]">New Draft Post</h3>
-            <button onClick={onClose} className="text-[#94A3B8] hover:text-[#64748B] text-xl leading-none transition">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-primary/40 backdrop-blur-sm">
+        <div className="bg-bone-surface border border-sand-border rounded-xl shadow-2xl w-full max-w-lg mx-4">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-sand-border">
+            <h3 className="font-display text-xl text-ink-primary">New Draft Post</h3>
+            <button onClick={onClose} className="text-ink-muted hover:text-ink-primary text-xl leading-none transition">
               &times;
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
-            <p className="text-sm text-[#64748B]">{dateLabel}</p>
+            <p className="text-sm text-ink-muted">{dateLabel}</p>
 
             <button
               type="button"
               onClick={function() { setShowWizard(true); }}
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 bg-brand-gold hover:bg-gold-dark text-white text-sm font-medium rounded-lg transition flex items-center justify-center gap-2"
             >
               <span>Generate with AI</span>
             </button>
 
             <div className="relative flex items-center">
-              <div className="flex-grow border-t border-[#E2E8F0]"></div>
-              <span className="flex-shrink mx-3 text-xs text-[#94A3B8]">or write manually</span>
-              <div className="flex-grow border-t border-[#E2E8F0]"></div>
+              <div className="flex-grow border-t border-sand-border"></div>
+              <span className="flex-shrink mx-3 text-xs text-ink-muted">or write manually</span>
+              <div className="flex-grow border-t border-sand-border"></div>
             </div>
 
             <div>
@@ -294,7 +294,7 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#0F172A] mb-2">Platforms</label>
+              <label className="block text-sm font-medium text-ink-primary mb-2">Platforms</label>
               <div className="flex flex-wrap gap-3">
                 {PLATFORMS.map((platform) => (
                   <label key={platform} className="flex items-center gap-2 cursor-pointer">
@@ -302,9 +302,9 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
                       type="checkbox"
                       checked={platforms.includes(platform)}
                       onChange={() => togglePlatform(platform)}
-                      className="rounded border-[#E2E8F0] text-[#4F46E5] focus:ring-[#4F46E5]"
+                      className="rounded border-sand-border text-brand-gold focus:ring-brand-gold"
                     />
-                    <span className="text-sm text-[#0F172A]">{platform}</span>
+                    <span className="text-sm text-ink-primary">{platform}</span>
                   </label>
                 ))}
               </div>
@@ -314,14 +314,14 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition"
+                className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#0F172A] hover:bg-[#F8F9FB] text-sm font-medium disabled:opacity-50 transition"
+                className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium disabled:opacity-50 transition"
               >
                 {saving ? 'Saving...' : 'Save as Draft'}
               </button>
@@ -331,7 +331,7 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
                     type="button"
                     onClick={handlePublish}
                     disabled={saving}
-                    className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
+                    className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
                   >
                     {saving ? 'Publishing...' : 'Publish'}
                   </button>
@@ -339,7 +339,7 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
                     type="button"
                     onClick={handleSaveAndSubmit}
                     disabled={saving}
-                    className="text-xs text-[#64748B] hover:text-[#4F46E5] transition"
+                    className="text-xs text-ink-muted hover:text-gold-dark transition"
                   >
                     Submit for Review instead
                   </button>
@@ -349,7 +349,7 @@ export default function CreatePostModal({ date, userRole, onClose, onSave, onSav
                   type="button"
                   onClick={handleSaveAndSubmit}
                   disabled={saving}
-                  className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
+                  className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition"
                 >
                   {saving ? 'Submitting...' : 'Submit for Review'}
                 </button>
