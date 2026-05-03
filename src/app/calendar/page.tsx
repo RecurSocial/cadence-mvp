@@ -17,8 +17,8 @@ export default function CalendarPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A]">Content Calendar</h1>
-          <p className="mt-1 text-sm text-[#64748B]">Plan and schedule social media posts</p>
+          <h1 className="font-display text-3xl text-ink-primary">Content Calendar</h1>
+          <p className="mt-1 text-sm text-ink-muted">Plan and schedule social media posts</p>
         </div>
       </div>
 
@@ -26,7 +26,7 @@ export default function CalendarPage() {
       {orgId ? (
         <WeeklyCalendarView orgId={orgId} />
       ) : (
-        <div className="text-center py-12 text-[#64748B]">Loading...</div>
+        <div className="text-center py-12 text-ink-muted">Loading...</div>
       )}
     </div>
   );

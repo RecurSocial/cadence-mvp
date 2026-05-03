@@ -157,7 +157,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const navBtnClass = 'px-3 py-1.5 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-white hover:text-[#0F172A] transition text-sm font-medium focus:outline-none';
+  const navBtnClass = 'px-3 py-1.5 border border-sand-border rounded-lg text-ink-muted hover:bg-bone-surface hover:text-ink-primary transition text-sm font-medium focus:outline-none';
 
   return (
     <div className="space-y-5">
@@ -168,7 +168,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
           <button onClick={goToday} className={navBtnClass}>Today</button>
           <button onClick={nextWeek} className={navBtnClass}>Next &rarr;</button>
         </div>
-        <h3 className="text-base font-semibold text-[#0F172A]">{formatDateRange(weekStart)}</h3>
+        <h3 className="text-base font-medium text-ink-primary">{formatDateRange(weekStart)}</h3>
       </div>
 
       {/* Weekly summary bar */}
@@ -185,13 +185,13 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
         const isThursdayOrLater = now >= weekThursday && now <= new Date(weekStart.getTime() + 6 * 86400000);
 
         return (
-          <div className="bg-white border border-[#E2E8F0] rounded-lg px-4 py-3">
+          <div className="bg-bone-surface border border-sand-border rounded-lg px-4 py-3">
             <div className="flex items-center gap-3 text-sm flex-wrap">
-              <span className="font-medium text-[#0F172A]">{posts.length} post{posts.length !== 1 ? 's' : ''} this week</span>
-              <span className="text-[#E2E8F0]">|</span>
+              <span className="font-medium text-ink-primary">{posts.length} post{posts.length !== 1 ? 's' : ''} this week</span>
+              <span className="text-sand-border">|</span>
               {ALL_POST_TYPES.map((type) => {
                 const count = counts[type] || 0;
-                const color = postTypeConfig[type]?.badgeColor || '#64748B';
+                const color = postTypeConfig[type]?.badgeColor || 'var(--ink-muted)';
                 const hasCount = count > 0;
                 return (
                   <span key={type} className="flex items-center gap-1.5">
@@ -200,12 +200,12 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
                       style={{ backgroundColor: color }}
                     />
                     {hasCount ? (
-                      <span className="text-[#0F172A]">
+                      <span className="text-ink-primary">
                         <span className="font-medium">{count}</span> {type}
                       </span>
                     ) : (
                       <span
-                        className={isThursdayOrLater ? 'text-[#EF4444] font-bold italic' : 'text-[#94A3B8]'}
+                        className={isThursdayOrLater ? 'text-alert font-medium italic' : 'text-ink-muted'}
                       >
                         {type}
                       </span>
@@ -220,7 +220,7 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
 
       {/* Calendar grid */}
       {loading ? (
-        <div className="text-center py-12 text-[#64748B]">Loading posts...</div>
+        <div className="text-center py-12 text-ink-muted">Loading posts...</div>
       ) : (
         <div className="grid grid-cols-7 gap-2">
           {DAY_LABELS.map((label, idx) => {
@@ -232,7 +232,9 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
               <div key={idx} className="min-h-[180px]">
                 <div
                   className={`text-center py-2 rounded-t-lg text-sm font-medium cursor-pointer transition ${
-                    isToday ? 'bg-[#4F46E5] text-white hover:bg-[#4338CA]' : 'bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]'
+                    isToday
+                      ? 'bg-brand-gold text-white hover:bg-gold-dark'
+                      : 'bg-bone-surface text-ink-muted hover:bg-sand-border/40'
                   }`}
                   onClick={() => setModalDate(cellDate)}
                 >
@@ -241,14 +243,14 @@ export default function WeeklyCalendarView({ orgId }: { orgId: string }) {
                 </div>
 
                 <div
-                  className="bg-white border border-t-0 border-[#E2E8F0] rounded-b-lg p-2 min-h-[140px] cursor-pointer hover:bg-[#F8F9FB] transition"
+                  className="bg-cream-bg border border-t-0 border-sand-border rounded-b-lg p-2 min-h-[140px] cursor-pointer hover:bg-bone-surface transition"
                   onClick={() => setModalDate(cellDate)}
                 >
                   {dayPosts[idx].map((post) => (
                     <PostSlot key={post.id} post={post} onClick={() => setSelectedPost(post)} />
                   ))}
                   {dayPosts[idx].length === 0 && (
-                    <div className="flex items-center justify-center h-full min-h-[100px] text-[#E2E8F0] text-2xl">
+                    <div className="flex items-center justify-center h-full min-h-[100px] text-sand-border text-2xl">
                       +
                     </div>
                   )}
