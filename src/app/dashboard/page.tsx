@@ -25,8 +25,8 @@ export default function Dashboard() {
   return (
     <div className="px-8 py-10">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#0F172A]">Office Dashboard</h1>
-        <p className="mt-1 text-sm text-[#64748B]">Your morning briefing — execution score, pending approvals, and the week at a glance</p>
+        <h1 className="font-display text-3xl text-ink-primary">Office Dashboard</h1>
+        <p className="mt-1 text-sm text-ink-muted">Your morning briefing — execution score, pending approvals, and the week at a glance</p>
       </div>
 
       {orgId && <ExecutionScoreCards orgId={orgId} />}
@@ -44,7 +44,7 @@ export default function Dashboard() {
 
       {canViewTabs && (
         <>
-          <div className="border-b border-[#E2E8F0] mt-8 mb-8">
+          <div className="border-b border-sand-border mt-8 mb-8">
             <nav className="flex gap-6" aria-label="Tabs">
               {[
                 { id: 'services', label: 'Services' },
@@ -56,8 +56,8 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className={'pb-3 text-sm font-medium border-b-2 transition ' + (
                     activeTab === tab.id
-                      ? 'border-[#4F46E5] text-[#4F46E5]'
-                      : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-[#E2E8F0]'
+                      ? 'border-brand-gold text-ink-primary'
+                      : 'border-transparent text-ink-muted hover:text-ink-primary hover:border-sand-border'
                   )}
                 >
                   {tab.label}

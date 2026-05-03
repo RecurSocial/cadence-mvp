@@ -74,17 +74,17 @@ export default function ExecutionScoreCards({ orgId }: { orgId: string }) {
   const missingDays = DAY_FULL.filter((_, i) => activeCounts[i] === 0);
   const pendingCount = posts.filter((p) => p.status === 'pending_review').length;
 
-  // Score color states
+  // Score severity → semantic color (warm cream-aligned, not traffic-light)
   const scoreColors = daysCovered >= 5
-    ? { bg: 'bg-green-50', text: 'text-green-700', bar: '#10B981', border: 'border-green-200' }
+    ? { text: 'text-success', barVar: 'var(--success)' }
     : daysCovered >= 3
-    ? { bg: 'bg-yellow-50', text: 'text-yellow-700', bar: '#F59E0B', border: 'border-yellow-200' }
-    : { bg: 'bg-red-50', text: 'text-red-700', bar: '#EF4444', border: 'border-red-200' };
+    ? { text: 'text-warning', barVar: 'var(--warning)' }
+    : { text: 'text-alert',   barVar: 'var(--alert)' };
 
   if (loading) {
     return (
       <div className="mb-8">
-        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-8 text-center text-[#64748B]">
+        <div className="bg-bone-surface border border-sand-border rounded-xl p-8 text-center text-ink-muted">
           Loading execution score...
         </div>
       </div>
@@ -94,65 +94,65 @@ export default function ExecutionScoreCards({ orgId }: { orgId: string }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       {/* Card 1 — Weekly Execution Score (spans 2 cols on large screens) */}
-      <div className={`lg:col-span-2 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border ${scoreColors.border} ${scoreColors.bg} p-6`}>
+      <div className="lg:col-span-2 rounded-xl border border-sand-border bg-bone-surface p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Weekly Execution Score</p>
-            <p className="text-sm text-[#64748B]">Posts covering this week</p>
+            <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Weekly Execution Score</p>
+            <p className="text-sm text-ink-muted">Posts covering this week</p>
           </div>
         </div>
 
         <div className="flex items-baseline gap-3 mb-4">
-          <span className={`text-[64px] leading-none font-bold ${scoreColors.text}`}>{daysCovered}</span>
-          <span className="text-3xl font-semibold text-[#64748B]">/ 6</span>
-          <span className="text-sm text-[#64748B] ml-2">days covered this week</span>
+          <span className={`text-[64px] leading-none font-display ${scoreColors.text}`}>{daysCovered}</span>
+          <span className="text-3xl font-display text-ink-muted">/ 6</span>
+          <span className="text-sm text-ink-muted ml-2">days covered this week</span>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full h-3 bg-white rounded-full overflow-hidden border border-[#E2E8F0] mb-4">
+        <div className="w-full h-3 bg-cream-bg rounded-full overflow-hidden border border-sand-border mb-4">
           <div
             className="h-full rounded-full transition-all"
-            style={{ width: `${(daysCovered / 6) * 100}%`, backgroundColor: scoreColors.bar }}
+            style={{ width: `${(daysCovered / 6) * 100}%`, backgroundColor: scoreColors.barVar }}
           />
         </div>
 
         {/* Status line */}
         {missingDays.length === 0 ? (
-          <p className="text-sm font-medium text-green-700">✅ Great week — all days covered!</p>
+          <p className="text-sm font-medium text-success">All days covered this week.</p>
         ) : (
-          <p className="text-sm font-medium text-[#0F172A]">
-            <span className="text-yellow-700">⚠️ Missing:</span>{' '}
-            <span className="text-[#64748B]">{missingDays.join(', ')}</span>
+          <p className="text-sm font-medium text-ink-primary">
+            <span className="text-warning">Missing:</span>{' '}
+            <span className="text-ink-muted">{missingDays.join(', ')}</span>
           </p>
         )}
       </div>
 
       {/* Card 2 — Pending Approvals */}
-      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-[#E2E8F0] p-6">
-        <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Pending Approvals</p>
+      <div className="bg-bone-surface border border-sand-border rounded-xl p-6">
+        <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Pending Approvals</p>
         <div className="flex items-baseline gap-2 mb-4 mt-2">
-          <span className="text-5xl font-bold text-[#0F172A]">{pendingCount}</span>
-          <span className="text-sm text-[#64748B]">posts awaiting approval</span>
+          <span className="text-5xl font-display text-ink-primary">{pendingCount}</span>
+          <span className="text-sm text-ink-muted">posts awaiting approval</span>
         </div>
         {pendingCount > 0 ? (
           isReviewer ? (
             <a
               href="/approvals"
-              className="inline-block px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium transition"
+              className="inline-block px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium transition"
             >
               Review Now
             </a>
           ) : (
-            <p className="text-sm text-[#64748B]">Awaiting owner or admin review</p>
+            <p className="text-sm text-ink-muted">Awaiting owner or admin review</p>
           )
         ) : (
-          <p className="text-sm font-medium text-green-700">✅ No posts pending approval</p>
+          <p className="text-sm font-medium text-success">No posts pending approval.</p>
         )}
       </div>
 
       {/* Card 3 — This Week at a Glance (spans full width) */}
-      <div className="lg:col-span-3 bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-[#E2E8F0] p-6">
-        <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-4">This Week at a Glance</p>
+      <div className="lg:col-span-3 bg-bone-surface border border-sand-border rounded-xl p-6">
+        <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-4">This Week at a Glance</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {DAY_LABELS.map((label, i) => {
             const cellDate = new Date(weekStart);
@@ -162,14 +162,14 @@ export default function ExecutionScoreCards({ orgId }: { orgId: string }) {
             const dateLabel = cellDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
             return (
-              <div key={i} className="flex items-center gap-3 bg-[#F8F9FB] rounded-lg px-3 py-2.5">
+              <div key={i} className="flex items-center gap-3 bg-cream-bg border border-sand-border rounded-lg px-3 py-2.5">
                 <span
                   className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: hasGap ? '#EF4444' : '#10B981' }}
+                  style={{ backgroundColor: hasGap ? 'var(--alert)' : 'var(--success)' }}
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-[#0F172A]">{DAY_FULL[i]}</p>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-sm font-medium text-ink-primary">{DAY_FULL[i]}</p>
+                  <p className="text-xs text-ink-muted">
                     {dateLabel} · {count} post{count !== 1 ? 's' : ''}
                   </p>
                 </div>

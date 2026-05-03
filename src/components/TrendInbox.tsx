@@ -88,32 +88,32 @@ export default function TrendInbox({ currentUserName, currentUserId, canReview, 
 
   function renderItem(item: TrendItem) {
     return (
-      <div key={item.id} className="p-3 border border-gray-100 rounded-lg hover:bg-gray-50">
+      <div key={item.id} className="p-3 border border-sand-border rounded-lg hover:bg-cream-bg transition">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-500 mb-1">
-              from <strong>{item.submitted_by_name}</strong>
+            <p className="text-xs text-ink-muted mb-1">
+              from <strong className="text-ink-primary font-medium">{item.submitted_by_name}</strong>
             </p>
             {item.url ? (
-              <span className="text-sm text-blue-600 truncate block">
+              <span className="text-sm text-gold-dark truncate block">
                 {item.url}
               </span>
             ) : null}
             {item.note ? (
-              <p className="text-sm text-gray-700 mt-1">{item.note}</p>
+              <p className="text-sm text-ink-primary mt-1">{item.note}</p>
             ) : null}
           </div>
           {canReview ? (
             <div className="flex gap-2 shrink-0">
               <button
                 onClick={function() { handleReview(item.id, 'approved', item) }}
-                className="px-3 py-1.5 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700"
+                className="px-3 py-1.5 bg-brand-gold hover:bg-gold-dark text-white text-xs rounded-lg font-medium transition"
               >
                 Create Post
               </button>
               <button
                 onClick={function() { handleReview(item.id, 'passed') }}
-                className="px-3 py-1.5 border border-gray-300 text-gray-600 text-xs rounded-lg hover:bg-gray-50"
+                className="px-3 py-1.5 border border-sand-border text-ink-muted hover:bg-cream-bg hover:text-ink-primary text-xs rounded-lg font-medium transition"
               >
                 Pass
               </button>
@@ -125,53 +125,53 @@ export default function TrendInbox({ currentUserName, currentUserId, canReview, 
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-bone-surface border border-sand-border rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900">
+          <h3 className="font-medium text-ink-primary">
             Trend Inbox
             {items.length > 0 ? (
-              <span className="ml-2 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="ml-2 bg-brand-gold/20 text-gold-dark text-xs font-medium px-2 py-0.5 rounded-full">
                 {items.length}
               </span>
             ) : null}
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5">Viral content ideas waiting for review</p>
+          <p className="text-xs text-ink-muted mt-0.5">Viral content ideas waiting for review</p>
         </div>
         <button
           onClick={function() { setShowSubmitForm(function(s) { return !s }) }}
-          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          className="text-sm text-gold-dark hover:text-ink-primary font-medium transition"
         >
           + Submit Trend
         </button>
       </div>
       {showSubmitForm ? (
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+        <div className="mb-4 p-4 bg-cream-bg rounded-lg border border-sand-border space-y-3">
           <input
             type="url"
             value={url}
             onChange={function(e) { setUrl(e.target.value) }}
             placeholder="Paste Instagram or TikTok URL..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-cream-bg border border-sand-border rounded-lg px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition"
           />
           <textarea
             value={note}
             onChange={function(e) { setNote(e.target.value) }}
             placeholder="What is the angle? Why is this relevant for us?"
             rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-cream-bg border border-sand-border rounded-lg px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition"
           />
           <div className="flex gap-2">
             <button
               onClick={handleSubmit}
               disabled={submitting || (!url && !note)}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-40"
+              className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white text-sm rounded-lg font-medium disabled:opacity-40 transition"
             >
               {submitting ? 'Submitting...' : 'Submit'}
             </button>
             <button
               onClick={function() { setShowSubmitForm(false) }}
-              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700"
+              className="px-4 py-2 text-sm text-ink-muted hover:text-ink-primary transition"
             >
               Cancel
             </button>
@@ -179,9 +179,9 @@ export default function TrendInbox({ currentUserName, currentUserId, canReview, 
         </div>
       ) : null}
       {loading ? (
-        <p className="text-sm text-gray-400">Loading...</p>
+        <p className="text-sm text-ink-muted">Loading...</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-4">No pending trends. Submit one above!</p>
+        <p className="text-sm text-ink-muted text-center py-4">No pending trends. Submit one above.</p>
       ) : (
         <div className="space-y-3">
           {items.map(function(item) { return renderItem(item) })}
