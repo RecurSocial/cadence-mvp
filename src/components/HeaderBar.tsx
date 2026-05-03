@@ -17,45 +17,45 @@ export default function HeaderBar() {
 
   if (loading) {
     return (
-      <header className="h-12 bg-white border-b border-[#E2E8F0] flex items-center justify-end px-6">
-        <div className="h-4 w-32 bg-gray-100 rounded animate-pulse" />
+      <header className="h-12 bg-bone-surface border-b border-sand-border flex items-center justify-end px-6">
+        <div className="h-4 w-32 bg-sand-border/40 rounded animate-pulse" />
       </header>
     );
   }
 
   return (
-    <header className="h-12 bg-white border-b border-[#E2E8F0] flex items-center justify-end px-6 gap-3 relative">
-      <span className="text-sm text-[#64748B]">{displayName || email || 'Unknown user'}</span>
+    <header className="h-12 bg-bone-surface border-b border-sand-border flex items-center justify-end px-6 gap-3 relative">
+      <span className="text-sm text-ink-muted">{displayName || email || 'Unknown user'}</span>
       <RoleBadge role={role} />
 
-{/* Dev user switcher (only renders when env var is set on localhost) */}
-{process.env.NEXT_PUBLIC_SHOW_DEV_SWITCHER === 'true' && (
-          <div className="relative">
-            <button
-              onClick={() => setShowSwitcher(!showSwitcher)}
-              className="text-xs text-[#94A3B8] hover:text-[#64748B] border border-dashed border-[#CBD5E1] rounded px-2 py-0.5 transition"
-              title="Switch user (dev only)"
-            >
-              Switch
-            </button>
-            {showSwitcher && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg py-1 z-50 min-w-[200px]">
-                {SEED_USERS.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => switchUser(u.id)}
-                    className={`block w-full text-left px-3 py-2 text-sm hover:bg-[#F8F9FB] transition ${
-                      u.id === userId ? 'text-[#4F46E5] font-medium' : 'text-[#0F172A]'
-                    }`}
-                  >
-                    {u.label}
-                    {u.id === userId && ' ✓'}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+      {/* Dev user switcher (only renders when env var is set on localhost) */}
+      {process.env.NEXT_PUBLIC_SHOW_DEV_SWITCHER === 'true' && (
+        <div className="relative">
+          <button
+            onClick={() => setShowSwitcher(!showSwitcher)}
+            className="text-xs text-ink-muted hover:text-ink-primary border border-dashed border-sand-border rounded px-2 py-0.5 transition"
+            title="Switch user (dev only)"
+          >
+            Switch
+          </button>
+          {showSwitcher && (
+            <div className="absolute right-0 top-full mt-1 bg-cream-bg border border-sand-border rounded-lg shadow-lg py-1 z-50 min-w-[200px]">
+              {SEED_USERS.map((u) => (
+                <button
+                  key={u.id}
+                  onClick={() => switchUser(u.id)}
+                  className={`block w-full text-left px-3 py-2 text-sm hover:bg-bone-surface transition ${
+                    u.id === userId ? 'text-brand-gold font-medium' : 'text-ink-primary'
+                  }`}
+                >
+                  {u.label}
+                  {u.id === userId && ' ✓'}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
-  }
+}
