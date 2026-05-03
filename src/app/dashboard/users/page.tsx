@@ -88,15 +88,15 @@ export default function UsersPage() {
   };
 
   if (authLoading) {
-    return <div className="px-8 py-10 text-[#64748B]">Loading...</div>;
+    return <div className="px-8 py-10 text-ink-muted">Loading...</div>;
   }
 
   if (!canManageUsers(currentRole)) {
     return (
       <div className="px-8 py-10">
-        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-12 text-center">
-          <h2 className="text-lg font-semibold text-[#0F172A] mb-2">Access Denied</h2>
-          <p className="text-[#64748B]">You don't have permission to view this page.</p>
+        <div className="bg-bone-surface border border-sand-border rounded-xl p-12 text-center">
+          <h2 className="font-display text-2xl text-ink-primary mb-2">Access Denied</h2>
+          <p className="text-ink-muted">You don&apos;t have permission to view this page.</p>
         </div>
       </div>
     );
@@ -109,40 +109,40 @@ export default function UsersPage() {
     <div className="px-8 py-10">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A]">Team</h1>
-          <p className="mt-1 text-sm text-[#64748B]">Manage team members and roles</p>
+          <h1 className="font-display text-3xl text-ink-primary">Team</h1>
+          <p className="mt-1 text-sm text-ink-muted">Manage team members and roles</p>
         </div>
         <button
           onClick={() => setShowInvite(true)}
-          className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium transition"
+          className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium transition"
         >
           Invite User
         </button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-[#64748B]">Loading team members...</div>
+        <div className="text-center py-12 text-ink-muted">Loading team members...</div>
       ) : (
-        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
+        <div className="border border-sand-border rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#E2E8F0]">
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Email</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Role</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Practitioner</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-[#64748B] uppercase tracking-wider">Actions</th>
+              <tr className="bg-bone-surface border-b border-sand-border">
+                <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Email</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Role</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Practitioner</th>
+                <th className="text-right px-6 py-3 text-xs font-medium text-ink-muted uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => {
+              {members.map((member, i) => {
                 const isSelf = member.user_id === userId;
                 const isProcessingRow = processing === member.id;
 
                 return (
-                  <tr key={member.id} className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F8F9FB] transition">
-                    <td className="px-6 py-4 text-sm text-[#0F172A]">
+                  <tr key={member.id} className={`${i % 2 === 1 ? 'bg-bone-surface/30' : 'bg-cream-bg'} border-b border-sand-border last:border-0 hover:bg-bone-surface transition`}>
+                    <td className="px-6 py-4 text-sm text-ink-primary">
                       {member.email}
-                      {isSelf && <span className="ml-2 text-xs text-[#94A3B8]">(you)</span>}
+                      {isSelf && <span className="ml-2 text-xs text-ink-muted">(you)</span>}
                     </td>
                     <td className="px-6 py-4">
                       {isOwner && !isSelf ? (
@@ -150,7 +150,7 @@ export default function UsersPage() {
                           value={member.role}
                           onChange={(e) => handleRoleChange(member.id, e.target.value as UserRole)}
                           disabled={isProcessingRow}
-                          className="text-sm border border-[#E2E8F0] rounded-lg px-2 py-1 focus:ring-2 focus:ring-[#4F46E5] focus:outline-none disabled:opacity-50"
+                          className="text-sm bg-cream-bg border border-sand-border rounded-lg px-2 py-1 text-ink-primary focus:ring-2 focus:ring-brand-gold focus:outline-none disabled:opacity-50"
                         >
                           {roleOptions.map((r) => (
                             <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
@@ -160,7 +160,7 @@ export default function UsersPage() {
                         <RoleBadge role={member.role} />
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
+                    <td className="px-6 py-4 text-sm text-ink-muted">
                       {member.practitioner_name || '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -168,17 +168,17 @@ export default function UsersPage() {
                         <>
                           {confirmRemove === member.id ? (
                             <div className="flex gap-2 justify-end items-center">
-                              <span className="text-xs text-[#64748B]">Remove?</span>
+                              <span className="text-xs text-ink-muted">Remove?</span>
                               <button
                                 onClick={() => handleRemove(member.id)}
                                 disabled={isProcessingRow}
-                                className="px-3 py-1 bg-[#EF4444] text-white text-xs rounded-lg hover:bg-[#DC2626] disabled:opacity-50 transition"
+                                className="px-3 py-1 bg-alert hover:bg-critical text-white text-xs rounded-lg font-medium disabled:opacity-50 transition"
                               >
                                 {isProcessingRow ? '...' : 'Yes'}
                               </button>
                               <button
                                 onClick={() => setConfirmRemove(null)}
-                                className="px-3 py-1 border border-[#E2E8F0] text-[#64748B] text-xs rounded-lg hover:bg-[#F8F9FB] transition"
+                                className="px-3 py-1 border border-sand-border text-ink-primary text-xs rounded-lg hover:bg-cream-bg transition"
                               >
                                 No
                               </button>
@@ -186,7 +186,7 @@ export default function UsersPage() {
                           ) : (
                             <button
                               onClick={() => setConfirmRemove(member.id)}
-                              className="text-xs text-[#EF4444] hover:text-[#DC2626] font-medium transition"
+                              className="text-xs text-alert hover:text-critical font-medium transition"
                             >
                               Remove
                             </button>

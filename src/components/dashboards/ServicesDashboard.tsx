@@ -7,8 +7,8 @@ interface ServiceWithVendor extends Service {
   vendor_name?: string;
 }
 
-const inputClass = 'w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition';
-const labelClass = 'block text-sm font-medium text-[#0F172A] mb-1';
+const inputClass = 'w-full px-3.5 py-2.5 bg-cream-bg border border-sand-border rounded-lg text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition';
+const labelClass = 'block text-sm font-medium text-ink-primary mb-1';
 
 export default function ServicesDashboard({ orgId }: { orgId: string }) {
   const [services, setServices] = useState<ServiceWithVendor[]>([]);
@@ -88,20 +88,20 @@ export default function ServicesDashboard({ orgId }: { orgId: string }) {
 
   const handleCancel = () => { setFormData({ name: '', category: '', product: '', supplier: '', duration_minutes: '', price: '' }); setEditingId(null); setShowForm(false); };
 
-  if (loading) return <div className="text-center py-12 text-[#64748B]">Loading services...</div>;
+  if (loading) return <div className="text-center py-12 text-ink-muted">Loading services...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-semibold text-[#0F172A]">Services</h2>
-          <p className="mt-0.5 text-sm text-[#64748B]">{services.length} services configured</p>
+          <h2 className="font-display text-2xl text-ink-primary">Services</h2>
+          <p className="mt-0.5 text-sm text-ink-muted">{services.length} services configured</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => setShowForm(!showForm)} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+          <button onClick={() => setShowForm(!showForm)} className="bg-brand-gold hover:bg-gold-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition">
             {showForm ? 'Cancel' : '+ Add Service'}
           </button>
-          <label className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-lg text-sm font-medium cursor-pointer disabled:opacity-50 transition">
+          <label className="px-4 py-2 border border-sand-border text-ink-primary hover:bg-bone-surface rounded-lg text-sm font-medium cursor-pointer disabled:opacity-50 transition">
             {isUploading ? 'Uploading...' : 'Upload Excel'}
             <input
               type="file"
@@ -115,14 +115,14 @@ export default function ServicesDashboard({ orgId }: { orgId: string }) {
       </div>
 
       {uploadMessage && (
-        <div className={`px-4 py-3 rounded-lg text-sm font-medium ${uploadMessage.startsWith('Error') || uploadMessage.startsWith('Upload failed') ? 'bg-[#EF4444]/15 text-[#DC2626]' : 'bg-[#10B981]/15 text-[#059669]'}`}>
+        <div className={`px-4 py-3 rounded-lg text-sm font-medium ${uploadMessage.startsWith('Error') || uploadMessage.startsWith('Upload failed') ? 'bg-alert/15 text-alert' : 'bg-success/15 text-success'}`}>
           {uploadMessage}
         </div>
       )}
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-6">
-          <h3 className="text-base font-semibold text-[#0F172A] mb-4">{editingId ? 'Edit Service' : 'New Service'}</h3>
+        <div className="bg-bone-surface border border-sand-border rounded-xl p-6">
+          <h3 className="text-base font-medium text-ink-primary mb-4">{editingId ? 'Edit Service' : 'New Service'}</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label className={labelClass}>Service Name *</label><input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} placeholder="e.g., Botox" /></div>
             <div><label className={labelClass}>Category *</label><select required value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className={inputClass}><option value="">Select category</option>{categories.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}</select></div>
@@ -131,37 +131,37 @@ export default function ServicesDashboard({ orgId }: { orgId: string }) {
             <div><label className={labelClass}>Duration (minutes)</label><input type="number" value={formData.duration_minutes} onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })} className={inputClass} placeholder="e.g., 15" /></div>
             <div><label className={labelClass}>Price</label><input type="text" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} className={inputClass} placeholder="e.g., $199.00" /></div>
             <div className="md:col-span-2 flex gap-3 justify-end">
-              <button type="button" onClick={handleCancel} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition">Cancel</button>
-              <button type="submit" className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium transition">{editingId ? 'Update' : 'Create'}</button>
+              <button type="button" onClick={handleCancel} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition">Cancel</button>
+              <button type="submit" className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium transition">{editingId ? 'Update' : 'Create'}</button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden">
+      <div className="border border-sand-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#F1F5F9]">
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Service</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Category</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Product</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Duration</th>
-                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Price</th>
-                <th className="px-4 py-3 text-center text-[11px] uppercase tracking-wider font-semibold text-[#64748B]">Actions</th>
+              <tr className="bg-bone-surface border-b border-sand-border">
+                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-medium text-ink-muted">Service</th>
+                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-medium text-ink-muted">Category</th>
+                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-medium text-ink-muted">Product</th>
+                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-medium text-ink-muted">Duration</th>
+                <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wider font-medium text-ink-muted">Price</th>
+                <th className="px-4 py-3 text-center text-[11px] uppercase tracking-wider font-medium text-ink-muted">Actions</th>
               </tr>
             </thead>
             <tbody>
               {services.map((service, i) => (
-                <tr key={service.id} className={`${i % 2 === 1 ? 'bg-[#F8F9FB]' : 'bg-white'} hover:bg-[#F1F5F9] transition`}>
-                  <td className="px-4 py-3 font-medium text-[#0F172A]">{service.name}</td>
-                  <td className="px-4 py-3 text-[#64748B]">{service.category}</td>
-                  <td className="px-4 py-3 text-[#64748B]">{service.product || '-'}</td>
-                  <td className="px-4 py-3 text-[#64748B]">{service.duration_minutes ? `${service.duration_minutes}m` : '-'}</td>
-                  <td className="px-4 py-3 text-[#64748B]">{service.price || '-'}</td>
+                <tr key={service.id} className={`${i % 2 === 1 ? 'bg-bone-surface/30' : 'bg-cream-bg'} hover:bg-bone-surface transition`}>
+                  <td className="px-4 py-3 font-medium text-ink-primary">{service.name}</td>
+                  <td className="px-4 py-3 text-ink-muted">{service.category}</td>
+                  <td className="px-4 py-3 text-ink-muted">{service.product || '-'}</td>
+                  <td className="px-4 py-3 text-ink-muted">{service.duration_minutes ? `${service.duration_minutes}m` : '-'}</td>
+                  <td className="px-4 py-3 text-ink-muted">{service.price || '-'}</td>
                   <td className="px-4 py-3 text-center space-x-3">
-                    <button onClick={() => handleEdit(service)} className="text-[#4F46E5] hover:text-[#4338CA] text-sm font-medium transition">Edit</button>
-                    <button onClick={() => handleDelete(service.id)} className="text-[#EF4444] hover:text-[#DC2626] text-sm font-medium transition">Delete</button>
+                    <button onClick={() => handleEdit(service)} className="text-gold-dark hover:text-ink-primary text-sm font-medium transition">Edit</button>
+                    <button onClick={() => handleDelete(service.id)} className="text-alert hover:text-critical text-sm font-medium transition">Delete</button>
                   </td>
                 </tr>
               ))}
