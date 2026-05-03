@@ -21,8 +21,8 @@ const POST_TYPE_TIMES: Record<string, { hour: number; minute: string; ampm: stri
   'Seasonal':      { hour: 11, minute: '00', ampm: 'AM' },
 };
 
-const inputClass = 'w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#4F46E5] focus:border-transparent transition';
-const labelClass = 'block text-sm font-medium text-[#0F172A] mb-1';
+const inputClass = 'w-full px-3.5 py-2.5 bg-cream-bg border border-sand-border rounded-lg text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition';
+const labelClass = 'block text-sm font-medium text-ink-primary mb-1';
 
 function parse12Hour(date: Date) {
   let h = date.getHours();
@@ -171,16 +171,16 @@ export default function ApprovalsPage() {
   return (
     <div className="px-8 py-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0F172A]">Approvals</h1>
-        <p className="mt-1 text-sm text-[#64748B]">Review and approve pending posts</p>
+        <h1 className="font-display text-3xl text-ink-primary">Approvals</h1>
+        <p className="mt-1 text-sm text-ink-muted">Review and approve pending posts</p>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-[#64748B]">Loading pending posts...</div>
+        <div className="text-center py-12 text-ink-muted">Loading pending posts...</div>
       ) : posts.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] p-12 text-center">
-          <p className="text-[#64748B]">No posts pending review</p>
-          <p className="text-sm text-[#94A3B8] mt-1">Posts submitted for review will appear here</p>
+        <div className="bg-bone-surface border border-sand-border rounded-xl p-12 text-center">
+          <p className="text-ink-primary">No posts pending review</p>
+          <p className="text-sm text-ink-muted mt-1">Posts submitted for review will appear here</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -197,7 +197,7 @@ export default function ApprovalsPage() {
             const isEditing = editingId === post.id;
 
             return (
-              <div key={post.id} className="bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] overflow-hidden" style={{ borderLeft: `4px solid ${ptConfig.badgeColor}` }}>
+              <div key={post.id} className="bg-bone-surface border border-sand-border rounded-xl overflow-hidden" style={{ borderLeftWidth: '4px', borderLeftColor: ptConfig.badgeColor }}>
                 <div className="p-6">
                   {/* Header row */}
                   <div className="flex items-center gap-2 mb-3">
@@ -206,8 +206,8 @@ export default function ApprovalsPage() {
                         {post.post_type}
                       </span>
                     )}
-                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#F59E0B]/15 text-[#D97706]">Pending Review</span>
-                    {scheduledDate && <span className="text-xs text-[#64748B] ml-auto">{scheduledDate} at {scheduledTime}</span>}
+                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-warning/15 text-warning">Pending Review</span>
+                    {scheduledDate && <span className="text-xs text-ink-muted ml-auto">{scheduledDate} at {scheduledTime}</span>}
                   </div>
 
                   {!isEditing ? (
@@ -215,25 +215,25 @@ export default function ApprovalsPage() {
                       {/* View mode — full detail */}
                       <div className="space-y-3">
                         <div>
-                          <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Caption</p>
-                          <p className="text-sm text-[#0F172A] whitespace-pre-wrap">{post.caption || 'No caption'}</p>
+                          <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Caption</p>
+                          <p className="text-sm text-ink-primary whitespace-pre-wrap">{post.caption || 'No caption'}</p>
                         </div>
                         {post.hashtags && (
                           <div>
-                            <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Hashtags</p>
+                            <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Hashtags</p>
                             <div className="flex gap-1.5 flex-wrap">
                               {post.hashtags.split(/\s+/).filter(Boolean).map((tag) => (
-                                <span key={tag} className="text-xs bg-[#4F46E5]/10 text-[#4F46E5] px-2 py-1 rounded-full font-medium">{tag}</span>
+                                <span key={tag} className="text-xs bg-brand-gold/15 text-gold-dark px-2 py-1 rounded-full font-medium">{tag}</span>
                               ))}
                             </div>
                           </div>
                         )}
                         {post.platforms && post.platforms.length > 0 && (
                           <div>
-                            <p className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-1">Platforms</p>
+                            <p className="text-xs font-medium text-ink-muted uppercase tracking-wider mb-1">Platforms</p>
                             <div className="flex gap-1.5 flex-wrap">
                               {post.platforms.map((p) => (
-                                <span key={p} className="text-xs bg-[#F1F5F9] text-[#64748B] px-2 py-1 rounded font-medium">{p}</span>
+                                <span key={p} className="text-xs bg-cream-bg border border-sand-border text-ink-muted px-2 py-1 rounded font-medium">{p}</span>
                               ))}
                             </div>
                           </div>
@@ -241,22 +241,22 @@ export default function ApprovalsPage() {
                       </div>
 
                       {/* Actions */}
-                      <div className="mt-4 pt-4 border-t border-[#E2E8F0]">
+                      <div className="mt-4 pt-4 border-t border-sand-border">
                         {!isReviewer ? (
-                          <p className="text-sm text-[#94A3B8] text-right">Waiting for owner or admin review</p>
+                          <p className="text-sm text-ink-muted text-right">Waiting for owner or admin review</p>
                         ) : !isRejecting ? (
                           <div className="flex gap-2 justify-end">
-                            <button onClick={() => startEditing(post)} disabled={isProcessing} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium disabled:opacity-50 transition">Edit</button>
-                            <button onClick={() => { setRejectingId(post.id); setRejectNotes(''); }} disabled={isProcessing} className="px-4 py-2 border border-[#EF4444] text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg text-sm font-medium disabled:opacity-50 transition">Reject</button>
-                            <button onClick={() => handleApprove(post.id)} disabled={isProcessing} className="px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">{isProcessing ? 'Approving...' : 'Approve'}</button>
+                            <button onClick={() => startEditing(post)} disabled={isProcessing} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium disabled:opacity-50 transition">Edit</button>
+                            <button onClick={() => { setRejectingId(post.id); setRejectNotes(''); }} disabled={isProcessing} className="px-4 py-2 border border-alert text-alert hover:bg-alert/10 rounded-lg text-sm font-medium disabled:opacity-50 transition">Reject</button>
+                            <button onClick={() => handleApprove(post.id)} disabled={isProcessing} className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">{isProcessing ? 'Approving...' : 'Approve'}</button>
                           </div>
                         ) : (
                           <div>
-                            <label className="block text-sm font-medium text-[#0F172A] mb-1">Rejection reason (required)</label>
+                            <label className="block text-sm font-medium text-ink-primary mb-1">Rejection reason (required)</label>
                             <textarea value={rejectNotes} onChange={(e) => setRejectNotes(e.target.value)} rows={3} className={inputClass + ' resize-none'} placeholder="Explain why this post is being rejected..." />
                             <div className="flex gap-2 justify-end mt-2">
-                              <button onClick={() => { setRejectingId(null); setRejectNotes(''); }} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition">Cancel</button>
-                              <button onClick={() => handleReject(post.id)} disabled={!rejectNotes.trim() || isProcessing} className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">{isProcessing ? 'Rejecting...' : 'Confirm Reject'}</button>
+                              <button onClick={() => { setRejectingId(null); setRejectNotes(''); }} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition">Cancel</button>
+                              <button onClick={() => handleReject(post.id)} disabled={!rejectNotes.trim() || isProcessing} className="px-4 py-2 bg-alert hover:bg-critical text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">{isProcessing ? 'Rejecting...' : 'Confirm Reject'}</button>
                             </div>
                           </div>
                         )}
@@ -279,19 +279,19 @@ export default function ApprovalsPage() {
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-[#0F172A] mb-2">Platforms</label>
+                            <label className="block text-sm font-medium text-ink-primary mb-2">Platforms</label>
                             <div className="flex flex-wrap gap-3">
                               {PLATFORMS.map((platform) => (
                                 <label key={platform} className="flex items-center gap-2 cursor-pointer">
-                                  <input type="checkbox" checked={editForm.platforms.includes(platform)} onChange={() => toggleEditPlatform(platform)} className="rounded border-[#E2E8F0] text-[#4F46E5] focus:ring-[#4F46E5]" />
-                                  <span className="text-sm text-[#0F172A]">{platform}</span>
+                                  <input type="checkbox" checked={editForm.platforms.includes(platform)} onChange={() => toggleEditPlatform(platform)} className="rounded border-sand-border text-brand-gold focus:ring-brand-gold" />
+                                  <span className="text-sm text-ink-primary">{platform}</span>
                                 </label>
                               ))}
                             </div>
                           </div>
-                          <div className="flex gap-2 justify-end pt-2 border-t border-[#E2E8F0]">
-                            <button onClick={() => { setEditingId(null); setEditForm(null); }} className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-[#64748B] hover:bg-[#F8F9FB] text-sm font-medium transition">Cancel</button>
-                            <button onClick={() => handleEditSave(post)} disabled={isProcessing} className="px-4 py-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">{isProcessing ? 'Saving...' : 'Save Changes'}</button>
+                          <div className="flex gap-2 justify-end pt-2 border-t border-sand-border">
+                            <button onClick={() => { setEditingId(null); setEditForm(null); }} className="px-4 py-2 border border-sand-border rounded-lg text-ink-primary hover:bg-cream-bg text-sm font-medium transition">Cancel</button>
+                            <button onClick={() => handleEditSave(post)} disabled={isProcessing} className="px-4 py-2 bg-brand-gold hover:bg-gold-dark text-white rounded-lg text-sm font-medium disabled:opacity-50 transition">{isProcessing ? 'Saving...' : 'Save Changes'}</button>
                           </div>
                         </div>
                       )}
