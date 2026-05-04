@@ -142,9 +142,10 @@ export const MANAGER_SIDEBAR: SidebarConfig = [
  * plus shared Calendar and Templates. No Office, no Settings, no
  * Approvals. Spec v1.3 §2.3 ("Staff").
  *
- * "My Drafts" and "My Submitted" are filtered views of the (yet-to-be-
- * built) /queue page. Encoding the filter in the URL keeps the stub list
- * simple: only one /queue route to stub in Step 6.
+ * "My Drafts" and "My Submitted" are top-level routes (stubbed in
+ * Step 6) rather than filtered views of /queue — they are conceptually
+ * distinct from the org-wide queue and active-state highlighting works
+ * cleanly when the path itself differs.
  */
 export const STAFF_SIDEBAR: SidebarConfig = [
   {
@@ -152,8 +153,8 @@ export const STAFF_SIDEBAR: SidebarConfig = [
     icon: 'content',
     items: [
       { label: 'Calendar',       href: '/calendar' },
-      { label: 'My Drafts',      href: '/queue?filter=my-drafts' },
-      { label: 'My Submitted',   href: '/queue?filter=my-submitted' },
+      { label: 'My Drafts',      href: '/my-drafts' },
+      { label: 'My Submitted',   href: '/my-submitted' },
       { label: 'Templates',      href: '/templates' },
     ],
   },
