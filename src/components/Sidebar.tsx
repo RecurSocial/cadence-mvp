@@ -189,16 +189,32 @@ export default function Sidebar() {
   const [showSwitcher, setShowSwitcher] = useState(false);
   const devSwitcherEnabled = process.env.NEXT_PUBLIC_SHOW_DEV_SWITCHER === 'true';
 
+  // Standard SaaS pattern: clicking the wordmark goes home (/calendar).
+  // When already on /calendar, force a refresh so the click never feels
+  // inert. Bypasses Link's same-route no-op.
+  const handleWordmarkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === '/calendar') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      router.refresh();
+    }
+  };
+
   return (
     <>
       <aside className="fixed inset-y-0 left-0 w-60 bg-cream-bg border-r border-sand-border flex flex-col z-40">
-        {/* Wordmark */}
-        <div className="px-6 py-6 border-b border-sand-border">
+        {/* Wordmark — clickable home link (standard SaaS pattern) */}
+        <Link
+          href="/calendar"
+          onClick={handleWordmarkClick}
+          aria-label="Go to Calendar"
+          className="block px-6 py-6 border-b border-sand-border transition hover:bg-bone-surface/60 focus:outline-none focus:bg-bone-surface/60"
+        >
           <p className="font-display text-2xl text-ink-primary leading-none">Cadence</p>
           <p className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-ink-muted">
             by RecurSocial
           </p>
-        </div>
+        </Link>
 
         {/* Draft a Post CTA */}
         {showDraftCTA && (
