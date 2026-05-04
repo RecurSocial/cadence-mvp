@@ -1,9 +1,14 @@
-export type UserRole = 'owner' | 'admin' | 'staff';
+export type UserRole = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer';
 
+// 'manager' is a spec alias for 'admin' (same level). The DB column still
+// stores 'admin' until the manager-rename kickoff lands. 'viewer' is read-
+// only and below staff.
 const ROLE_LEVEL: Record<UserRole, number> = {
   owner: 3,
   admin: 2,
+  manager: 2,
   staff: 1,
+  viewer: 0,
 };
 
 function hasMinRole(userRole: UserRole | null, required: UserRole): boolean {
