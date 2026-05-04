@@ -32,7 +32,7 @@ export default function Home() {
           <h2 className="text-lg font-medium text-ink-primary mb-4">Phase 1</h2>
           <ul className="space-y-2.5 text-sm text-ink-muted">
             <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand-gold" /> Admin dashboards</li>
-            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand-gold" /> Office Dashboard</li>
+            <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand-gold" /> Content calendar</li>
             <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-brand-gold" /> Approval workflow</li>
             <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-success" /> Ready to launch</li>
           </ul>
@@ -52,8 +52,8 @@ export default function Home() {
       </div>
 
       <div className="text-center">
-        <a href="/dashboard" className="inline-block bg-brand-gold hover:bg-gold-dark text-white font-medium py-2.5 px-6 rounded-lg transition">
-          Go to Dashboard
+        <a href="/calendar" className="inline-block bg-brand-gold hover:bg-gold-dark text-white font-medium py-2.5 px-6 rounded-lg transition">
+          Open Calendar
         </a>
       </div>
     </div>

@@ -16,7 +16,6 @@
 import { getOrgBrandTokens, type BrandTokens } from '@/lib/brand-tokens';
 
 // Hardcoded for v1. Multi-tenancy comes when we onboard customer #2.
-// Matches the pattern already used in src/app/dashboard/page.tsx.
 const EUPHORIA_ORG_ID = '74b04f56-8cf0-7427-b977-7574b183226d';
 
 // ============================================================
