@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCurrentUser, switchUser } from '@/hooks/useCurrentUser';
+import { usePendingApprovalsCount } from '@/hooks/usePendingApprovalsCount';
 import { createClient } from '@/lib/supabase/client';
 import { getSidebarForRole, type SidebarSection } from '@/lib/sidebar-config';
 import CreatePostModal from '@/components/calendar/CreatePostModal';
@@ -40,6 +41,19 @@ function findActiveSectionLabel(config: SidebarSection[], pathname: string): str
   return config.find((s) => s.label && s.items.some((i) => isActiveHref(i.href, pathname)))?.label;
 }
 
+/**
+ * Pending-approvals count pill. Brand-gold fill, ink-primary text per
+ * Spec v1.3 §2.2. Sits to the right of either the Content section header
+ * (when collapsed) or the Approvals sub-item (when expanded) — never both.
+ */
+function ApprovalsBadge({ count }: { count: number }) {
+  return (
+    <span className="text-[11px] tabular-nums leading-none px-1.5 py-0.5 rounded-full bg-brand-gold text-ink-primary font-medium">
+      {count}
+    </span>
+  );
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -48,6 +62,9 @@ export default function Sidebar() {
   const config = getSidebarForRole(role);
   const showDraftCTA =
     role === 'owner' || role === 'admin' || role === 'manager' || role === 'staff';
+  // Approvals badge is Owner/Manager/Admin only — Staff and Viewer never see it.
+  const isReviewer = role === 'owner' || role === 'admin' || role === 'manager';
+  const pendingApprovals = usePendingApprovalsCount(orgId, isReviewer);
 
   // Sections containing the active route are open by default. Manual
   // toggles persist; subsequent navigations into a different section
@@ -215,6 +232,9 @@ export default function Sidebar() {
                   >
                     {Icon && <Icon className="w-4 h-4 shrink-0" />}
                     <span className="flex-1 text-left">{section.label}</span>
+                    {section.label === 'Content' && !open && pendingApprovals > 0 && (
+                      <ApprovalsBadge count={pendingApprovals} />
+                    )}
                     <ChevronIcon
                       className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-90' : ''}`}
                     />
@@ -236,6 +256,9 @@ export default function Sidebar() {
                             }`}
                           >
                             <span className="flex-1">{item.label}</span>
+                            {item.href === '/approvals' && pendingApprovals > 0 && (
+                              <ApprovalsBadge count={pendingApprovals} />
+                            )}
                             {item.badge && (
                               <span className="text-[10px] uppercase tracking-wider text-ink-muted bg-bone-surface px-1.5 py-0.5 rounded">
                                 {item.badge}
