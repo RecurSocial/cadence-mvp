@@ -1,31 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/*
+ * Global styles for the Cadence application shell.
+ *
+ * CSS custom properties below mirror the tokens in src/lib/app-tokens.ts.
+ * Keep the two in sync: the TS module is the source of truth for any
+ * programmatic consumer (server-rendered images, brand-aware utilities);
+ * these CSS variables are the source of truth for component styling.
+ *
+ * Per-customer content brand tokens live in brand-tokens.ts and are
+ * spread into rendered content via tokensToCssVars(). They never appear
+ * on Cadence app shell surfaces.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #F8F9FB;
-  --foreground: #0F172A;
-  --sidebar-bg: #1E293B;
-  --primary: #4F46E5;
-  --card-bg: #FFFFFF;
-  --text-primary: #0F172A;
-  --text-secondary: #64748B;
-  --border: #E2E8F0;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --table-header-bg: #F1F5F9;
-  --table-alt-row: #F8F9FB;
+  /* Cadence app shell palette — Spec v1.2 §1.3 */
+  --cream-bg:      #FAF7F2;
+  --bone-surface:  #F2EDE2;
+  --sand-border:   #D8CFB9;
+  --brand-gold:    #C9A961;
+  --gold-dark:     #9E8240;
+  --ink-primary:   #2A2419;
+  --ink-muted:     #6B6357;
+
+  /* Semantic colors — aligned to the cream palette */
+  --success:   #7A8C5C;  /* olive-sage */
+  --warning:   #C4923D;  /* deep honey */
+  --alert:     #B85C3F;  /* terracotta */
+  --critical:  #8B3A2E;  /* oxblood */
+
+  /* Typography — Spec v1.2 §1.4 */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /*
+   * Expose the Cadence app shell tokens as Tailwind utilities so
+   * components can write `bg-cream-bg`, `text-ink-primary`,
+   * `border-sand-border`, `font-display`, etc.
+   */
+  --color-cream-bg:     var(--cream-bg);
+  --color-bone-surface: var(--bone-surface);
+  --color-sand-border:  var(--sand-border);
+  --color-brand-gold:   var(--brand-gold);
+  --color-gold-dark:    var(--gold-dark);
+  --color-ink-primary:  var(--ink-primary);
+  --color-ink-muted:    var(--ink-muted);
+
+  --color-success:  var(--success);
+  --color-warning:  var(--warning);
+  --color-alert:    var(--alert);
+  --color-critical: var(--critical);
+
+  --font-display: var(--font-display);
+  --font-sans:    var(--font-sans);
+
+  /* Background/foreground aliases used by Tailwind defaults */
+  --color-background: var(--cream-bg);
+  --color-foreground: var(--ink-primary);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--cream-bg);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

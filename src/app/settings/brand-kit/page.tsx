@@ -2,34 +2,20 @@
  * Brand Kit Page (v1 — read-only display)
  *
  * Path: /settings/brand-kit
- * Locked: April 26, 2026
  *
  * Displays the customer's brand kit: 10 color tokens, 2 fonts, logo.
- * No editor in v1 — brand is set via seed migration. Editor ships in
- * a later phase once the brand pipes are validated end-to-end.
+ * No editor in v1 — brand is set via seed migration.
  *
- * STYLING NOTES:
- *
- * This page intentionally uses semantic CSS variables (var(--background),
- * var(--card-bg), etc.) defined in src/app/globals.css instead of
- * hardcoded hex values. The current globals.css defines an indigo/slate
- * palette; on May 1, 2026 those values will be replaced with the Cadence
- * luxury palette (champagne, cream, graphite). This page will inherit
- * the new palette automatically with zero code changes.
- *
- * Customer brand colors (the swatch grid contents) are RENDERED AS DATA
- * via inline style props. They come from the database, not CSS. This
- * separation is intentional: chrome surfaces use CSS variables, content
- * surfaces use brand tokens from getOrgBrandTokens().
- *
- * NO HARDCODED HEX CODES IN THIS FILE FOR CHROME STYLING. Only customer
- * brand color values appear as hex (rendered as content data).
+ * Chrome styling uses the Cadence app shell CSS variables defined in
+ * src/app/globals.css (--ink-primary, --ink-muted, --sand-border,
+ * --bone-surface). Customer brand colors render as data via inline
+ * style props with hex values from getOrgBrandTokens(). The two
+ * systems never mix on this page.
  */
 
 import { getOrgBrandTokens, type BrandTokens } from '@/lib/brand-tokens';
 
 // Hardcoded for v1. Multi-tenancy comes when we onboard customer #2.
-// Matches the pattern already used in src/app/dashboard/page.tsx.
 const EUPHORIA_ORG_ID = '74b04f56-8cf0-7427-b977-7574b183226d';
 
 // ============================================================
@@ -103,19 +89,19 @@ function Header() {
     <div>
       <p
         className="text-xs font-semibold uppercase tracking-widest mb-2"
-        style={{ color: 'var(--text-secondary)' }}
+        style={{ color: 'var(--ink-muted)' }}
       >
         Settings
       </p>
       <h1
         className="text-3xl font-bold"
-        style={{ color: 'var(--text-primary)' }}
+        style={{ color: 'var(--ink-primary)' }}
       >
         Brand Kit
       </h1>
       <p
         className="mt-2 text-sm"
-        style={{ color: 'var(--text-secondary)' }}
+        style={{ color: 'var(--ink-muted)' }}
       >
         Your brand drives every post Cadence creates for you.
       </p>
@@ -132,7 +118,7 @@ function ColorPaletteSection({ tokens }: { tokens: BrandTokens }) {
           <div key={group.groupLabel}>
             <p
               className="text-xs font-semibold uppercase tracking-widest mb-4"
-              style={{ color: 'var(--text-secondary)' }}
+              style={{ color: 'var(--ink-muted)' }}
             >
               {group.groupLabel}
             </p>
@@ -168,25 +154,25 @@ function Swatch({
         className="w-full aspect-square rounded-lg shadow-sm"
         style={{
           backgroundColor: hex,
-          border: '1px solid var(--border)',
+          border: '1px solid var(--sand-border)',
         }}
         aria-label={`Color swatch: ${label}, ${hex}`}
       />
       <p
         className="mt-2 text-sm font-medium"
-        style={{ color: 'var(--text-primary)' }}
+        style={{ color: 'var(--ink-primary)' }}
       >
         {label}
       </p>
       <p
         className="mt-0.5 text-xs font-mono"
-        style={{ color: 'var(--text-secondary)' }}
+        style={{ color: 'var(--ink-muted)' }}
       >
         {hex.toUpperCase()}
       </p>
       <p
         className="mt-0.5 text-xs"
-        style={{ color: 'var(--text-secondary)' }}
+        style={{ color: 'var(--ink-muted)' }}
       >
         {description}
       </p>
@@ -227,20 +213,20 @@ function FontSample({
     <div>
       <p
         className="text-xs font-semibold uppercase tracking-widest"
-        style={{ color: 'var(--text-secondary)' }}
+        style={{ color: 'var(--ink-muted)' }}
       >
         {role}
       </p>
       <p
         className="mt-1 text-sm"
-        style={{ color: 'var(--text-primary)' }}
+        style={{ color: 'var(--ink-primary)' }}
       >
         {fontName}
       </p>
       <p
         className="mt-3 text-3xl"
         style={{
-          color: 'var(--text-primary)',
+          color: 'var(--ink-primary)',
           fontFamily: fontStack,
         }}
       >
@@ -270,19 +256,19 @@ function LogoSection({ tokens }: { tokens: BrandTokens }) {
         <div
           className="rounded-lg p-12 flex flex-col items-center justify-center text-center"
           style={{
-            backgroundColor: 'var(--table-alt-row)',
-            border: '1px dashed var(--border)',
+            backgroundColor: 'var(--cream-bg)',
+            border: '1px dashed var(--sand-border)',
           }}
         >
           <p
             className="text-sm font-medium"
-            style={{ color: 'var(--text-primary)' }}
+            style={{ color: 'var(--ink-primary)' }}
           >
             No logo uploaded yet
           </p>
           <p
             className="mt-1 text-xs"
-            style={{ color: 'var(--text-secondary)' }}
+            style={{ color: 'var(--ink-muted)' }}
           >
             Upload coming soon
           </p>
@@ -298,17 +284,17 @@ function PreviewSection() {
       <CardHeader title="Preview" />
       <div
         className="rounded-lg p-6"
-        style={{ backgroundColor: 'var(--table-alt-row)' }}
+        style={{ backgroundColor: 'var(--cream-bg)' }}
       >
         <p
           className="text-sm"
-          style={{ color: 'var(--text-primary)' }}
+          style={{ color: 'var(--ink-primary)' }}
         >
           See your brand applied to a sample post.
         </p>
         <p
           className="mt-1 text-xs"
-          style={{ color: 'var(--text-secondary)' }}
+          style={{ color: 'var(--ink-muted)' }}
         >
           Template preview coming with Smart Content Templates (Phase 6).
         </p>
@@ -326,8 +312,8 @@ function Card({ children }: { children: React.ReactNode }) {
     <div
       className="rounded-xl p-6 shadow-sm"
       style={{
-        backgroundColor: 'var(--card-bg)',
-        border: '1px solid var(--border)',
+        backgroundColor: 'var(--bone-surface)',
+        border: '1px solid var(--sand-border)',
       }}
     >
       {children}
@@ -339,7 +325,7 @@ function CardHeader({ title }: { title: string }) {
   return (
     <h2
       className="text-lg font-semibold mb-6"
-      style={{ color: 'var(--text-primary)' }}
+      style={{ color: 'var(--ink-primary)' }}
     >
       {title}
     </h2>
@@ -354,13 +340,13 @@ function BrandKitEmptyState() {
         <Card>
           <p
             className="text-sm"
-            style={{ color: 'var(--text-primary)' }}
+            style={{ color: 'var(--ink-primary)' }}
           >
             Your brand kit hasn&apos;t been set up yet.
           </p>
           <p
             className="mt-2 text-sm"
-            style={{ color: 'var(--text-secondary)' }}
+            style={{ color: 'var(--ink-muted)' }}
           >
             Reach out to support to get started.
           </p>

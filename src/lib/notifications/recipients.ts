@@ -1,7 +1,9 @@
 import { createServerClient } from '@/lib/supabase/server';
 import type { UserRole } from '@/lib/auth/permissions';
 
-const ROLE_LEVEL: Record<UserRole, number> = { owner: 3, admin: 2, staff: 1 };
+// Mirrors ROLE_LEVEL in src/lib/auth/permissions.ts. 'manager' is an alias
+// for 'admin'; 'viewer' is below staff and never receives notifications.
+const ROLE_LEVEL: Record<UserRole, number> = { owner: 3, admin: 2, manager: 2, staff: 1, viewer: 0 };
 
 /**
  * Get email addresses of all org members with role >= minRole.

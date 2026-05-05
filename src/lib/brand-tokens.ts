@@ -1,26 +1,12 @@
 /**
- * Brand Tokens — Cadence two-layer brand model
+ * Per-customer content brand tokens. Sourced from org_brand_settings.
+ * Used exclusively for rendering generated content (post visuals,
+ * templates) — never for the Cadence application shell.
  *
- * Layer 1 (Cadence chrome): immutable. Defined in `cadenceChrome` below.
- *   These tokens drive the application UI — sidebar, calendar, dashboard,
- *   Cadence Brief card, settings pages. Never customer-customizable.
+ * For app shell tokens see app-tokens.ts.
  *
- *   IMPORTANT (April 26, 2026): The cadenceChrome values below represent
- *   the LUXURY palette that Cadence chrome is migrating TO on May 1, 2026.
- *   The current live app still renders in indigo/slate. Pages built today
- *   should reference semantic CSS variables (var(--background), etc.) and
- *   Tailwind utility classes (bg-background, text-foreground), NOT these
- *   hex values directly. When the May 1 chrome repaint updates globals.css,
- *   pages using semantic variables inherit the new look automatically.
- *
- * Layer 2 (Customer brand): per-org. Fetched from `org_brand_settings`.
- *   These tokens drive content template output only — generated social
- *   posts, before/after cards, story templates. Never used in chrome.
- *
- * Semantic colors (success/warning/alert/critical) are part of Layer 1.
- * They are aligned with the Cadence palette to avoid traffic-light loudness.
- *
- * Locked April 26, 2026.
+ * Brand changes apply forward only. We do not snapshot brand per post —
+ * the platform (Instagram, etc.) already holds the historical record.
  */
 
 import { createServerClient } from './supabase/server';
@@ -58,70 +44,8 @@ export interface BrandTokens {
   logoUrl: string | null;
 }
 
-export interface SemanticColors {
-  /** On track, completed, healthy */
-  success: string;
-  /** Pay attention, gap forming */
-  warning: string;
-  /** Problem, decay starting */
-  alert: string;
-  /** Severe — bookings stalled, posting decay confirmed */
-  critical: string;
-}
-
 // ============================================================
-// CADENCE CHROME (Layer 1 — immutable, target palette)
-// ============================================================
-
-/**
- * The Cadence application UI palette — TARGET state after May 1 repaint.
- * Do not consume these values directly in components today. Use semantic
- * Tailwind classes and CSS variables instead, which will automatically
- * resolve to these values once globals.css is updated on May 1.
- *
- * Exposed here for reference, documentation, and future programmatic uses
- * (e.g., generating brand-aware OG images server-side).
- */
-export const cadenceChrome: BrandTokens = {
-  bgPrimary:      '#FAF7F2',  // cream
-  bgSecondary:    '#F2ECE2',  // bone
-  borderSubtle:   '#E8DFD0',  // sand
-  borderStrong:   '#DCCDB4',  // sand-warm
-  textTertiary:   '#A89B87',  // stone
-  textSecondary:  '#2A2824',  // graphite
-  textPrimary:    '#151412',  // ink
-  accentLight:    '#D4B896',  // champagne
-  accent:         '#B8925E',  // gold
-  accentDeep:     '#8B6B3D',  // gold-deep
-  fontSerif:      'Playfair Display',
-  fontSans:       'Inter',
-  logoUrl:        null,       // chrome doesn't carry a customer logo
-};
-
-// ============================================================
-// SEMANTIC COLORS (Layer 1 — immutable, aligned to palette)
-// ============================================================
-
-/**
- * Status colors used in Cadence chrome only. NEVER appear in
- * customer-rendered template output.
- *
- * Hard rule: semantic colors live on chrome surfaces (sidebar,
- * calendar status pills, dashboard scorecard, Cadence Brief
- * banner). They never render in generated social posts.
- *
- * Color philosophy: same severity scale as a traffic light, but
- * desaturated and warmed to live next to champagne and bone.
- */
-export const semanticColors: SemanticColors = {
-  success:   '#7A8C5C',  // olive-sage
-  warning:   '#C4923D',  // deep honey
-  alert:     '#B85C3F',  // terracotta
-  critical:  '#8B3A2E',  // oxblood
-};
-
-// ============================================================
-// CUSTOMER BRAND (Layer 2 — fetched from DB)
+// CUSTOMER BRAND (fetched from DB)
 // ============================================================
 
 /**

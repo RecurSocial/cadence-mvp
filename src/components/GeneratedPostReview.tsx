@@ -27,20 +27,20 @@ export default function GeneratedPostReview({ generated, platforms, format, post
   const fullCaption = caption + (hashtagStr ? '\n\n' + hashtagStr : '')
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 bg-ink-primary/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-bone-surface border border-sand-border rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-sand-border">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">✅ AI-Generated Draft</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h2 className="font-display text-xl text-ink-primary">AI-Generated Draft</h2>
+            <p className="text-sm text-ink-muted mt-0.5">
               {platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' + ')} • {format.charAt(0).toUpperCase() + format.slice(1)}
             </p>
           </div>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+          <button onClick={onCancel} className="text-ink-muted hover:text-ink-primary text-xl leading-none transition">×</button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* Urgency note for trends */}
+          {/* Urgency note for trends — content surface, not restyled (post-creation internals) */}
           {generated.urgency_note && (
             <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800">
               ⚡ {generated.urgency_note}
@@ -49,24 +49,24 @@ export default function GeneratedPostReview({ generated, platforms, format, post
 
           {/* Caption */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Caption (edit freely)</label>
+            <label className="block text-sm font-medium text-ink-primary mb-2">Caption (edit freely)</label>
             <textarea
               value={caption}
               onChange={e => setCaption(e.target.value)}
               rows={6}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-cream-bg border border-sand-border rounded-lg px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition"
             />
-            <p className="text-xs text-gray-400 mt-1">{caption.length} characters</p>
+            <p className="text-xs text-ink-muted mt-1">{caption.length} characters</p>
           </div>
 
           {/* Hashtags */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Hashtags</label>
+            <label className="block text-sm font-medium text-ink-primary mb-2">Hashtags</label>
             <input
               type="text"
               value={hashtagStr}
               onChange={e => setHashtagStr(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-cream-bg border border-sand-border rounded-lg px-3 py-2 text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-transparent transition"
             />
           </div>
 
@@ -105,18 +105,18 @@ export default function GeneratedPostReview({ generated, platforms, format, post
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t bg-gray-50 rounded-b-xl">
+        <div className="flex items-center justify-between p-6 border-t border-sand-border bg-cream-bg rounded-b-xl">
           <div className="flex gap-3">
-            <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
+            <button onClick={onCancel} className="px-4 py-2 text-sm text-ink-muted hover:text-ink-primary transition">
               Cancel
             </button>
-            <button onClick={onRegenerate} className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+            <button onClick={onRegenerate} className="px-4 py-2 text-sm border border-sand-border text-ink-primary rounded-lg hover:bg-bone-surface transition">
               ↺ Regenerate
             </button>
           </div>
           <button
             onClick={() => onUse(fullCaption, generated.hashtags)}
-            className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-brand-gold hover:bg-gold-dark text-white text-sm font-medium rounded-lg transition"
           >
             Use This Draft →
           </button>
