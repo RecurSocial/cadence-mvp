@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0.0",
+  "client_profile": {
+    "business_name": "SYNTHETIC TEST CLIENT — DO NOT USE FOR REAL CONTENT",
+    "primary_location": { "city": "TestCity", "state": "TS" },
+    "additional_locations": [],
+    "brand_voice_notes": "Synthetic placeholder. Warm, professional, educational tone for testing.",
+    "compliance_tier": "med_spa_standard",
+    "platform_focus": ["instagram", "facebook", "google_business_profile", "tiktok"],
+    "posts_per_week": 5,
+    "rep_referral": {
+      "partner_type": "equipment",
+      "partner_company": "SYNTHETIC_EQUIPMENT_CO",
+      "partner_product": "SYNTHETIC_LASER_MODEL",
+      "rep_name": "SYNTHETIC_REP_NAME",
+      "rep_email": "rep@example.com",
+      "referral_date": "2026-04-15",
+      "referral_id": "ref_equipment_20260415_synth",
+      "commission_tier": "standard",
+      "notes": "Synthetic data. Not a real referral."
+    },
+    "hero_service_focus": {
+      "enabled": true,
+      "service_name": "SYNTHETIC_HERO_LASER",
+      "service_category": "laser",
+      "focus_reason": "new_equipment",
+      "target_allocation_pct": 40,
+      "campaign_window_weeks": 12,
+      "context_notes": "SYNTHETIC TEST DATA. None of these numbers are real. Equipment notionally installed April 2026. Notional financing requires ~15-18 treatments per month at $1,200 average to break even. Currently averaging 6 treatments per month. Owner notionally concerned about utilization. Local audience does not yet associate the practice with laser services."
+    }
+  },
+  "service_menu": [
+    {
+      "service": "SYNTHETIC_HERO_LASER",
+      "category": "laser",
+      "price_display": "synthetic price",
+      "is_hero_service": true,
+      "promotion_active": false
+    },
+    {
+      "service": "SYNTHETIC_SECONDARY_LASER",
+      "category": "laser",
+      "price_display": "synthetic price",
+      "is_hero_service": false,
+      "promotion_active": false
+    },
+    {
+      "service": "SYNTHETIC_NEUROTOXIN",
+      "category": "neurotoxin",
+      "price_display": "synthetic price",
+      "is_hero_service": false,
+      "promotion_active": false
+    },
+    {
+      "service": "SYNTHETIC_FILLER",
+      "category": "filler",
+      "price_display": "synthetic price",
+      "is_hero_service": false,
+      "promotion_active": false
+    },
+    {
+      "service": "SYNTHETIC_SKINCARE",
+      "category": "skincare",
+      "price_display": "synthetic price",
+      "is_hero_service": false,
+      "promotion_active": false
+    }
+  ],
+  "promo_calendar": [
+    {
+      "promo_name": "SYNTHETIC_HERO_CONSULTATION_PROMO",
+      "start_date": "2026-06-08",
+      "end_date": "2026-06-29",
+      "services_included": ["SYNTHETIC_HERO_LASER"],
+      "discount_display": "synthetic discount",
+      "feature_priority": "primary"
+    }
+  ],
+  "performance_data": {
+    "top_post_types_last_30d": [],
+    "weakest_post_types_last_30d": [],
+    "avg_engagement_rate_pct": null,
+    "notes": "Synthetic test fixture. Empty performance data simulates cold-start scenario."
+  },
+  "calendar_window": {
+    "start_date": "2026-06-01",
+    "weeks": 4
+  },
+  "client_notes_for_this_calendar": "Synthetic test note. Verify the agent handles a hero service with zero historical performance data without inventing engagement signals."
+}

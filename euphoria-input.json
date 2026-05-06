@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "client_profile": {
+    "business_name": "Euphoria Esthetics & Wellness",
+    "primary_location": { "city": "Barnegat", "state": "NJ" },
+    "additional_locations": [{ "city": "Lake Wylie", "state": "SC" }],
+    "brand_voice_notes": "",
+    "compliance_tier": "med_spa_hrt_weight_loss",
+    "platform_focus": ["instagram", "facebook", "google_business_profile", "tiktok"],
+    "posts_per_week": null
+  },
+  "service_menu": [
+    {
+      "service": "TEMPLATE_DELETE_ME",
+      "category": "neurotoxin",
+      "price_display": "starting at $13/unit",
+      "is_hero_service": true,
+      "promotion_active": false
+    }
+  ],
+  "promo_calendar": [],
+  "performance_data": {
+    "top_post_types_last_30d": [],
+    "weakest_post_types_last_30d": [],
+    "avg_engagement_rate_pct": null,
+    "notes": ""
+  },
+  "calendar_window": {
+    "start_date": null,
+    "weeks": 4
+  },
+  "client_notes_for_this_calendar": ""
+}
